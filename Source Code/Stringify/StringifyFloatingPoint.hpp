@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <charconv>
 #include <stdexcept>
 #include <typeinfo>
@@ -17,10 +18,12 @@ namespace klib::kFormat::stringify
 	{
 		if (precision == nPrecision)
 			precision = 6;
-		
-		char buff[std::numeric_limits<T>::max_exponent10 + 1]{};
-		char* const end = std::end(buff);
 
+		constexpr auto maxsize = std::numeric_limits<T>::max_exponent10 + 1;
+		char buff[maxsize]{};
+		char* const end = std::end(buff);
+		
+#if _HAS_COMPLETE_CHARCONV
 		const std::to_chars_result res = std::to_chars(buff, end, val, fmt, static_cast<int>(precision));
 
 		if (res.ec != std::errc{})
@@ -32,6 +35,12 @@ namespace klib::kFormat::stringify
 
 		kString::StringWriter<CharType> str(kString::Convert<CharType>(buff));
 		HandleDecimalPrecision(str, precision, CharType('0'));
+#else
+		const std::string format = "%." + std::to_string(precision) + "f";
+		const auto length = _snprintf(buff, maxsize, format.data(), val);
+		const auto conv = kString::Convert<CharType>(buff);
+		const kString::StringWriter<CharType> str(conv, conv + length);
+#endif 
 
 		return str;
 	}

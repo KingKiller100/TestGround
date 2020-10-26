@@ -8,9 +8,9 @@ namespace klib::kFormat::stringify
 		, typename = std::enable_if_t<std::is_same_v<T, bool>
 		|| type_trait::Is_CharType_V<CharType>>
 		>
-	kString::StringWriter<CharType> StringBool(const bool val)
+	kString::StringWriter<CharType> StringBool(const T val)
 	{
-		std::basic_string_view<CharType> booleanResult;
+		std::basic_string<CharType> booleanResult;
 		if _CONSTEXPR_IF(std::is_same_v<CharType, char>)
 			booleanResult = val ? "true" : "false";
 		else if _CONSTEXPR_IF(std::is_same_v<CharType, wchar_t>)

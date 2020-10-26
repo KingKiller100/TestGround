@@ -70,7 +70,7 @@ namespace klib::type_trait
 
 #ifdef __cpp_char8_t
 	template<>
-	struct Is_StringTypeBase<std::u8string> : std::true_type
+	struct Is_StringTypeBase<std::basic_string<char8_t>> : std::true_type
 	{};
 #endif
 
@@ -92,7 +92,7 @@ namespace klib::type_trait
 
 #ifdef __cpp_char8_t
 	template<>
-	struct Is_StringTypeBase<std::u8string_view> : std::true_type
+	struct Is_StringTypeBase<std::basic_string_view<char8_t>> : std::true_type
 	{};
 #endif
 

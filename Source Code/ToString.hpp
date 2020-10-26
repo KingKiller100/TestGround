@@ -3,6 +3,7 @@
 #include "StringTypeTraits.hpp"
 #include "StringConverter.hpp"
 
+#include "Stringify/StringifyBool.hpp"
 #include "Stringify/StringifyInteger.hpp"
 #include "Stringify/StringifyPointer.hpp"
 #include "Stringify/StringifyFloatingPoint.hpp"
@@ -184,7 +185,7 @@ namespace klib {
 			return formattedText;
 		}
 
-		template<typename CharType, size_t Size>
+		template<typename CharType, std::size_t Size>
 		std::deque<std::pair<unsigned char, std::string>> CreateIdentifiers(std::basic_string<CharType>& fmt,  std::array<std::any, Size>& elems)
 		{
 			static constexpr auto openerSymbol = CharType('{');
@@ -400,22 +401,7 @@ namespace klib {
 				else if (id.second.find("bool") != npos)
 				{
 					const auto res = std::any_cast<const bool*>(val);
-					std::basic_string_view<CharType> data;
-					if _CONSTEXPR_IF(std::is_same_v<CharType, char>)
-						data = *res ? "true" : "false";
-					else if _CONSTEXPR_IF(std::is_same_v<CharType, wchar_t>)
-						data = *res ? L"true" : L"false";
-					else if _CONSTEXPR_IF(std::is_same_v<CharType, char16_t>)
-						data = *res ? u"true" : u"false";
-					else if _CONSTEXPR_IF(std::is_same_v<CharType, char32_t>)
-						data = *res ? U"true" : U"false";
-#ifdef __cpp_char8_t
-					else if _CONSTEXPR_IF(std::is_same_v<CharType, char8_t>)
-						data = *res ? u8"true" : u8"false";
-#endif
-					currentSection.erase(replacePos);
-					currentSection.insert(replacePos, data);
-
+					currentSection.append(stringify::StringBool<CharType>(*res));
 					finalString.append(currentSection);
 				}
 				else

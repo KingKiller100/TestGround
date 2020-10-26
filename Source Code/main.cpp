@@ -8,7 +8,7 @@ int main()
 	bool res = false;
 	for (auto i = 0ull; i < 5; ++i)
 	{
-		const auto str = klib::kFormat::ToString("{0}: {1:2}: {2:5}\n", &res, 8680488060ull, 120.985f, 24);
+		const auto str = klib::kFormat::ToString("0x{0}: {1:2}: {2:5} - {3} - {4}\n", &res, 8680488060ull, 120.985f, 24, false);
 		// const auto str = klib::kFormat::ToString("{0}: {1:2}\n", "w", 120.0f);
 		// const auto str1 = klib::kFormat::ToString("{0} {1:2}: string {1} {3} {2:4} \n", txt, 120.0f, 60u, res);
 		// const auto str2 = klib::kFormat::ToString("%s %s string %f %u", txt, "foo", 120.0, 60u);
