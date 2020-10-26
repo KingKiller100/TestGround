@@ -1,2 +1,2 @@
-# ToString
+# Stringify
 Custom type safe and templated string interpolator function
