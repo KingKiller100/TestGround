@@ -5,7 +5,7 @@ workspace "Stringify"
     configurations
     {
         "Debug",
-        -- "Release"
+        "Release"
     }
 
     flags
@@ -23,7 +23,7 @@ project "ToString"
     characterset ("default")
 	staticruntime "on"
 
-    targetdir ("ToString/bin/" .. OutputDir .. "/%{prj.name}")s
+    targetdir ("ToString/bin/" .. OutputDir .. "/%{prj.name}")
     objdir ("ToString/bin-int/" .. OutputDir .. "/%{prj.name}")
 
     -- pchheader "Precompile.hpp"
