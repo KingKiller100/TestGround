@@ -23,22 +23,22 @@ project "ToString"
     characterset ("default")
 	staticruntime "on"
 
-    targetdir ("ToString/bin/" .. OutputDir .. "/%{prj.name}")
-    objdir ("ToString/bin-int/" .. OutputDir .. "/%{prj.name}")
+    targetdir ("bin/" .. OutputDir .. "/%{prj.name}")
+    objdir ("bin-int/" .. OutputDir .. "/%{prj.name}")
 
     -- pchheader "Precompile.hpp"
     -- pchsource "Krakoa/Source Files/Precompile.cpp"
 
     files
     {
-        "Source Files/**.hpp",
-        "Source Files/**.cpp",
-        "cpp.hint"
+        "ToString/Source Code/**.hpp",
+        "ToString/Source Code/**.cpp",
+        -- "cpp.hint"
     }
 
     includedirs
     {
-        "Source Files/",
+        "ToString/Source Code/",
     }
 
     defines
