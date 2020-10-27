@@ -8,6 +8,10 @@ int main()
 	const auto ull = 8680488060ull;
 	bool res = false;
 
+	const std::string s("pudding");
+
+	const auto l = klib::GetValuePtr<char>(txt);
+	
 	constexpr auto k = klib::type_trait::Is_CharType_V<decltype(txt)>;
 	for (auto i = 0ull; i < 5; ++i)
 	{

@@ -46,7 +46,7 @@ namespace klib {
 			>
 			GetValuePtr(const T& str)
 		{
-			return &str;
+			return std::addressof(str);
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -108,10 +108,24 @@ namespace klib {
 			&& std::is_same_v<CharType, ONLY_TYPE(T)>
 			&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
 			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
-			, const T>
+			, const T*>
 			GetValuePtr(const T obj)
 		{
-			return obj;
+			return &obj;
+		}
+
+		template<typename CharType, typename T, size_t Size>
+		constexpr
+			std::enable_if_t <
+			type_trait::Is_CharType_V<CharType>
+			&& std::is_pointer_v<T>
+			&& std::is_same_v<CharType, ONLY_TYPE(T)>
+			&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
+			, const T>
+			GetValuePtr(const T (&obj)[Size])
+		{
+			return &obj;
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -146,6 +160,21 @@ namespace klib {
 		{
 			return &obj;
 		}
+
+		template<typename CharType, typename T, size_t Size>
+		constexpr
+			std::enable_if_t <
+			type_trait::Is_CharType_V<CharType>
+			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& std::is_arithmetic_v<T>
+			&& !std::is_same_v<CharType, ONLY_TYPE(T)>
+			&& !std::is_pointer_v<T>
+			, const T>
+			GetValuePtr(const T(&obj)[Size])
+		{
+			return &obj;
+		}
+		
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////
