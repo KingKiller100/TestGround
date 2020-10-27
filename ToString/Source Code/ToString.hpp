@@ -3,6 +3,7 @@
 #include "StringTypeTraits.hpp"
 #include "StringConverter.hpp"
 
+#include "Stringify/kSprintf.hpp"
 #include "Stringify/StringifyBool.hpp"
 #include "Stringify/StringifyInteger.hpp"
 #include "Stringify/StringifyPointer.hpp"
@@ -10,183 +11,179 @@
 
 #include <any>
 #include <array>
-#include <cstdio>
 #include <deque>
 #include <string>
 #include <sstream>
 #include <variant>
 #include <xtr1common>
 
-#if defined (_MSC_VER)
-#	pragma warning(push)
-#	pragma warning(disable : 4996)
-
 namespace klib {
 	namespace kFormat
 	{
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 		// C++ STL string/string_view
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		template<typename CharType, typename T>
 		constexpr
-			std::enable_if_t <type_trait::Is_CharType_V<C>
-			&& type_trait::Is_StringType_V<U>,
-			const typename T::value_type*>
+			std::enable_if_t<
+			type_trait::Is_CharType_V<CharType>
+			&& type_trait::Is_StringType_V<T>
+			&& std::is_same_v<CharType, typename T::value_type>
+			, const typename T::value_type*
+			>
 			GetValue(const T& str)
 		{
 			return str.data();
 		}
 
-		// Non C string, but primative type ptrs
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
+		template<typename CharType, typename T>
 		constexpr
-			std::enable_if_t<type_trait::Is_CharType_V<C>
-			&& std::is_pointer_v<U>
-			&& !type_trait::Is_CharType_V<ONLY_TYPE(U)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(U)>
-			, const void*>
-			GetValue(const T obj)
-		{
-			return (const void*)obj;
-		}
-
-		// C string ptrs
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
-		constexpr
-			std::enable_if_t<type_trait::Is_CharType_V<C>
-			&& std::is_pointer_v<U>
-			&& type_trait::Is_CharType_V<ONLY_TYPE(U)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(U)>
-			&& std::is_same_v<C, ONLY_TYPE(U)>
-			, const T>
-			GetValue(const T obj)
-		{
-			return obj;
-		}
-
-		// Primitive types (int, double, unsigned long long,...) but not bool
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
-		constexpr
-			std::enable_if_t<type_trait::Is_CharType_V<C>
-			&& std::is_arithmetic_v<U>
-			, const U>
-			GetValue(const T obj)
-		{
-			return obj;
-		}
-
-		// Non-primative types
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
-		constexpr
-			std::enable_if_t<(type_trait::Is_CharType_V<C>
-				&& !std::is_arithmetic_v<std::decay_t<U>>
-				&& !type_trait::Is_StringType_V<U>
-				&& !std::is_pointer_v<std::decay_t<U>>
-				), const CharType*>
-			GetValue(const T& obj)
-		{
-			return obj.ToString().data();
-		}
-
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
-		constexpr
-			std::enable_if_t <type_trait::Is_CharType_V<C>
-			&& type_trait::Is_StringType_V<U>,
-			const T*>
+			std::enable_if_t <
+			type_trait::Is_CharType_V<CharType>
+			&& type_trait::Is_StringType_V<T>
+			&& std::is_same_v<CharType, typename T::value_type>
+			, const T*
+			>
 			GetValuePtr(const T& str)
 		{
 			return &str;
 		}
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// Non C string, but primitive ptrs
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		// Non C string, but primitive type ptrs
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		template<typename CharType, typename T>
 		constexpr
-			std::enable_if_t <type_trait::Is_CharType_V<C>
-			&& std::is_pointer_v<U>
-			&& !type_trait::Is_CharType_V<ONLY_TYPE(U)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(U)>
+			std::enable_if_t<
+			type_trait::Is_CharType_V<CharType>
+			&& std::is_pointer_v<T>
+			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
+			, const void*
+			>
+			GetValue(const T obj)
+		{
+			return (const void*)obj;
+		}
+
+		template<typename CharType, typename T>
+		constexpr
+			std::enable_if_t <
+			type_trait::Is_CharType_V<CharType>
+			&& std::is_pointer_v<T>
+			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
 			, const void*>
 			GetValuePtr(const T obj)
 		{
 			return (const void*)obj;
 		}
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 		// C string ptrs
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		template<typename CharType, typename T>
 		constexpr
-			std::enable_if_t <type_trait::Is_CharType_V<C>
-			&& std::is_pointer_v<U>
-			&& type_trait::Is_CharType_V<ONLY_TYPE(U)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(U)>
-			&& std::is_same_v<C, ONLY_TYPE(U)>
+			std::enable_if_t<
+			type_trait::Is_CharType_V<CharType>
+			&& std::is_pointer_v<T>
+			&& std::is_same_v<CharType, ONLY_TYPE(T)>
+			&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
+			, const T
+			>
+			GetValue(const T obj)
+		{
+			return obj;
+		}
+
+		template<typename CharType, typename T>
+		constexpr
+			std::enable_if_t <
+			type_trait::Is_CharType_V<CharType>
+			&& std::is_pointer_v<T>
+			&& std::is_same_v<CharType, ONLY_TYPE(T)>
+			&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
 			, const T>
 			GetValuePtr(const T obj)
 		{
 			return obj;
 		}
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// primitive types (int, double, unsigned long long,...)
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		// Primitive types (int, double, unsigned long long,...)
+		template<typename CharType, typename T>
 		constexpr
-			std::enable_if_t <type_trait::Is_CharType_V<C>
-			&& std::is_arithmetic_v<U>
-			, const U*>
+			std::enable_if_t<
+			type_trait::Is_CharType_V<CharType>
+			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& std::is_arithmetic_v<T>
+			&& !std::is_same_v<CharType, ONLY_TYPE(T)>
+			&& !std::is_pointer_v<T>
+			, T
+			>
+			GetValue(T obj)
+		{
+			return obj;
+		}
+
+
+		template<typename CharType, typename T>
+		constexpr
+			std::enable_if_t <
+			type_trait::Is_CharType_V<CharType>
+			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
+			&& std::is_arithmetic_v<T>
+			&& !std::is_same_v<CharType, ONLY_TYPE(T)>
+			&& !std::is_pointer_v<T>
+			, const T*>
 			GetValuePtr(const T& obj)
 		{
 			return &obj;
 		}
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 		// Non-primitive custom types - Must have a function ToString that returns a C++ STL string type
-		template<typename CharType, typename T, typename C = CharType, typename U = T>
+		// Non-primitive types
+		/////////////////////////////////////////////////////////////////////////////////////////////////
+		template<typename CharType, typename T>
 		constexpr
-			std::enable_if_t <(type_trait::Is_CharType_V<C>
-				&& !std::is_arithmetic_v<std::decay_t<U>>
-				&& !type_trait::Is_StringType_V<U>
-				&& !std::is_pointer_v<std::decay_t<U>>
-				), const std::basic_string<C>*>
-			GetValuePtr(T obj)
+			std::enable_if_t<
+			type_trait::Is_CharType_V<CharType>
+			&& !std::is_arithmetic_v<std::decay_t<T>>
+			&& !type_trait::Is_StringType_V<T>
+			&& !std::is_pointer_v<std::decay_t<T>>
+			, const CharType*
+			>
+			GetValue(const T& obj)
 		{
-			static std::basic_string<CharType> str;
-			str = obj.ToString();
-			return &str;
+			return GetValue<CharType>(obj.ToString());
 		}
 
-		template<typename CharType, typename T, typename ...Ts>
-		constexpr std::basic_string<CharType> MakeStringFromData(const std::basic_string<CharType>& format, T arg1, Ts ...argPack)
+		template<typename CharType, typename T>
+		constexpr
+			std::enable_if_t <
+			type_trait::Is_CharType_V<CharType>
+			&& !std::is_arithmetic_v<std::decay_t<T>>
+			&& !type_trait::Is_StringType_V<T>
+			&& !std::is_pointer_v<std::decay_t<T>>
+			, const std::basic_string<CharType>*>
+			GetValuePtr(const T& obj)
 		{
-			constexpr auto npos = std::basic_string<CharType>::npos;
-
-			CharType* buffer = nullptr;
-			size_t length = npos;
-
-			if _CONSTEXPR_IF(std::is_same_v<CharType, char>)
-			{
-				length = static_cast<size_t>(_snprintf(nullptr, 0, format.data(), arg1, argPack...) + 1);
-				if (length == 0) throw std::runtime_error("Error during char type \"ToString(...)\" formatting: string returned length == 0");
-				buffer = new CharType[length]();
-				sprintf_s(buffer, length, format.data(), arg1, argPack...);
-			}
-			else if _CONSTEXPR_IF(std::is_same_v<CharType, wchar_t>)
-			{
-				length = static_cast<size_t>(_snwprintf(nullptr, 0, format.data(), arg1, argPack...) + 1);
-				if (length == 0) throw std::runtime_error("Error during wchar_t type \"ToString(...)\" formatting: string returned length == 0");
-				buffer = new CharType[length]();
-				swprintf_s(buffer, length, format.data(), arg1, argPack...);
-			}
-			else
-			{
-				const auto fmt = kString::Convert<wchar_t>(format);
-				const auto str = MakeStringFromData<wchar_t>(fmt, arg1, argPack...);
-				const auto text = kString::Convert<CharType>(str);
-
-				return text;
-			}
-
-			const auto formattedText = std::basic_string<CharType>(buffer, buffer + (CAST(ptrdiff_t, length) - 1));
-			delete[] buffer;
-			return formattedText;
+			static std::vector<std::basic_string<CharType>> list;
+			list.push_back(obj.ToString());
+			return &list.back();
 		}
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 
 		template<typename CharType, std::size_t Size>
-		std::deque<std::pair<unsigned char, std::string>> CreateIdentifiers(std::basic_string<CharType>& fmt,  std::array<std::any, Size>& elems)
+		std::deque<std::pair<unsigned char, std::string>> CreateIdentifiers(std::basic_string<CharType>& fmt, std::array<std::any, Size>& elems)
 		{
 			static constexpr auto openerSymbol = CharType('{');
 			static constexpr auto closerSymbol = CharType('}');
@@ -195,8 +192,8 @@ namespace klib {
 			static constexpr auto npos = std::basic_string<CharType>::npos;
 
 			std::deque<std::pair<unsigned char, std::string>> identifiers;
-			for (auto openerPos = fmt.find_first_of(openerSymbol); 
-				openerPos != npos; 
+			for (auto openerPos = fmt.find_first_of(openerSymbol);
+				openerPos != npos;
 				openerPos = fmt.find_first_of(openerSymbol, openerPos + 1))
 			{
 				if (fmt[openerPos + 1] == openerSymbol ||
@@ -225,8 +222,9 @@ namespace klib {
 
 		// Outputs a interpolated string with data given for all string types. NOTE: Best performance with char and wchar_t type strings
 		template<class CharType, typename T, typename ...Ts>
-		USE_RESULT constexpr std::basic_string<CharType> ToString(const std::basic_string<CharType>& format, const T& arg, const Ts& ...argPack)
+		USE_RESULT constexpr std::basic_string<CharType> ToString(const std::basic_string_view<CharType>& format, const T& arg, const Ts& ...argPack)
 		{
+			using namespace kString;
 			using DataTypes = std::variant<std::monostate, T, Ts...>;
 
 			static constexpr auto printfSymbol = CharType('%');
@@ -236,28 +234,27 @@ namespace klib {
 			static constexpr auto nullTerminator = type_trait::s_NullTerminator<CharType>;
 			static constexpr auto npos = std::basic_string<CharType>::npos;
 
-
 			if (auto pfSymPos = format.find(printfSymbol); pfSymPos != npos)
 			{
-				return MakeStringFromData<CharType>(format, GetValue<CharType, T>(arg), GetValue<CharType, Ts>(argPack)...);
+				return stringify::Sprintf<CharType>(format, GetValue<CharType>(arg), GetValue<CharType>(argPack)...);
 			}
-
-			std::basic_string<CharType> fmt(format);
 
 			std::array<std::any, std::variant_size_v<DataTypes> -1> elems = { GetValuePtr<CharType, T>(arg), GetValuePtr<CharType, Ts>(argPack)... };
 
+			std::basic_string<CharType> fmt(format);
 			std::deque<std::pair<unsigned char, std::string>> identifiers = CreateIdentifiers(fmt, elems);
 
 			std::basic_string<CharType> finalString;
 			for (const auto& id : identifiers)
 			{
 				const auto& val = elems[id.first];
+				const auto& type = id.second;
 				const auto inputPos = fmt.find_first_of(closerSymbol) + 1;
 				auto currentSection = fmt.substr(0, inputPos);
 				auto replacePos = currentSection.find_first_of(openerSymbol);
 				auto colonPos = currentSection.find(precisionSymbol, replacePos);
 				size_t padding = stringify::nPrecision;
-				
+
 				if (colonPos != npos)
 				{
 					padding = std::stoll(kString::Convert<char>(currentSection.substr(colonPos + 1, inputPos - 1)));
@@ -265,43 +262,43 @@ namespace klib {
 
 				currentSection.erase(replacePos);
 
-				if (id.second.find("void") != npos)
+				if (HasString(type, "void"))
 				{
 					auto data = std::any_cast<const void*>(val);
 					currentSection.append(stringify::StringifyPointer<CharType>(data, padding));
 					finalString.append(currentSection);
 				}
-				else if (id.second.find("basic_string_view") != npos)
+				else if (HasString(type, "basic_string_view"))
 				{
 					const auto data = std::any_cast<const std::basic_string_view<CharType>*>(val);
 					currentSection.erase(replacePos);
 					currentSection.insert(replacePos, data->data());
 					finalString.append(currentSection);
 				}
-				else if (id.second.find("basic_string") != npos)
+				else if (HasString(type, "basic_string"))
 				{
 					const auto data = std::any_cast<const std::basic_string<CharType>*>(val);
 					currentSection.erase(replacePos);
 					currentSection.insert(replacePos, data->data());
 					finalString.append(currentSection);
 				}
-				else if (id.second.find("unsigned") != npos)
+				else if (HasString(type, "unsigned"))
 				{
-					if (id.second.find("char") != npos)
+					if (HasString(type, "char"))
 					{
 						auto data = std::any_cast<const unsigned char*>(val);
 						currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
 						finalString.append(currentSection);
 					}
-					else if (id.second.find("short") != npos)
+					else if (HasString(type, "short"))
 					{
 						auto data = std::any_cast<const unsigned short*>(val);
 						currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
 						finalString.append(currentSection);
 					}
-					else if (id.second.find("int") != npos)
+					else if (HasString(type, "int"))
 					{
-						if (id.second.find("__int64") != npos)
+						if (HasString(type, "__int64"))
 						{
 							auto data = std::any_cast<const unsigned __int64*>(val);
 							currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
@@ -314,10 +311,9 @@ namespace klib {
 							finalString.append(currentSection);
 						}
 					}
-					else if (auto longPos = id.second.find("long"); longPos != npos)
+					else if (HasString(type, "long"))
 					{
-						auto long2Pos = id.second.find_first_of("long long");
-						if (long2Pos != npos)
+						if (HasString(type, "long long"))
 						{
 							auto data = std::any_cast<const unsigned long long*>(val);
 							currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
@@ -331,21 +327,21 @@ namespace klib {
 						}
 					}
 				}
-				else if (const auto longPos = id.second.find("long"); longPos != npos)
+				else if (HasString(type, "long"))
 				{
-					if (id.second.find_first_of("double", longPos + 4) != npos)
+					if (HasString(type, "double"))
 					{
 						auto data = std::any_cast<const long double*>(val);
 						currentSection += stringify::StringFloatingPoint<CharType>(*data, padding);
 						finalString.append(currentSection);
 					}
-					else if (id.second.find_first_of("int", longPos + 4) != npos)
+					else if (HasString(type, "int"))
 					{
 						auto data = std::any_cast<const long int*>(val);
 						currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
 						finalString.append(currentSection);
 					}
-					else if (const auto long2Pos = id.second.find_first_of("long long"); long2Pos != npos)
+					else if (HasString(type, "long long"))
 					{
 						const auto data = std::any_cast<const long long*>(val);
 						currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
@@ -358,22 +354,22 @@ namespace klib {
 						finalString.append(currentSection);
 					}
 				}
-				else if (id.second.find("char") != npos)
+				else if (HasString(type, "char"))
 				{
 					const auto data = std::any_cast<const CharType*>(val);
 					currentSection.erase(replacePos);
 					currentSection.insert(replacePos, data);
 					finalString.append(currentSection);
 				}
-				else if (id.second.find("short") != npos)
+				else if (HasString(type, "short"))
 				{
 					auto data = std::any_cast<const short*>(val);
 					currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
 					finalString.append(currentSection);
 				}
-				else if (id.second.find("int") != npos)
+				else if (HasString(type, "int"))
 				{
-					if (id.second.find("__int64") != npos)
+					if (HasString(type, "__int64"))
 					{
 						auto data = std::any_cast<const __int64*>(val);
 						currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
@@ -386,19 +382,19 @@ namespace klib {
 						finalString.append(currentSection);
 					}
 				}
-				else if (kString::HasString (id.second, "double"))
+				else if (HasString(type, "double"))
 				{
 					const auto data = std::any_cast<const double*>(val);
 					currentSection += stringify::StringFloatingPoint<CharType>(*data, padding);
 					finalString.append(currentSection);
 				}
-				else if (id.second.find("float") != npos)
+				else if (HasString(type, "float"))
 				{
 					const auto data = std::any_cast<const float*>(val);
 					currentSection.append(stringify::StringFloatingPoint<CharType>(*data, padding));
 					finalString.append(currentSection);
 				}
-				else if (id.second.find("bool") != npos)
+				else if (HasString(type, "bool"))
 				{
 					const auto res = std::any_cast<const bool*>(val);
 					currentSection.append(stringify::StringBool<CharType>(*res));
@@ -422,7 +418,7 @@ namespace klib {
 		template<class CharType, typename T, typename ...Ts>
 		USE_RESULT constexpr std::basic_string<CharType> ToString(const CharType* format, const T& arg, const Ts& ...argPack)
 		{
-			const std::basic_string<CharType> fmt(format);
+			const std::basic_string_view<CharType> fmt(format);
 			const std::basic_string<CharType> text = ToString(fmt, arg, argPack...);
 			return text;
 		}
@@ -440,6 +436,3 @@ namespace klib {
 	using namespace kFormat;
 #endif
 }
-
-#	pragma warning(pop)
-#endif
