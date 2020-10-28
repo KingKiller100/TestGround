@@ -3,6 +3,7 @@
 #include "StringTypeTraits.hpp"
 #include "StringConverter.hpp"
 
+#include "Stringify/StringIdentity.hpp"
 #include "Stringify/kSprintf.hpp"
 #include "Stringify/StringifyBool.hpp"
 #include "Stringify/StringifyInteger.hpp"
@@ -20,197 +21,6 @@
 namespace klib {
 	namespace kFormat
 	{
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		// C++ STL string/string_view
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t<
-			type_trait::Is_CharType_V<CharType>
-			&& type_trait::Is_StringType_V<T>
-			&& std::is_same_v<CharType, typename T::value_type>
-			, const typename T::value_type*
-			>
-			GetValue(const T& str)
-		{
-			return str.data();
-		}
-
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t <
-			type_trait::Is_CharType_V<CharType>
-			&& type_trait::Is_StringType_V<T>
-			&& std::is_same_v<CharType, typename T::value_type>
-			, const T*
-			>
-			GetValuePtr(const T& str)
-		{
-			return std::addressof(str);
-		}
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		// Non C string, but primitive type ptrs
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t<
-			type_trait::Is_CharType_V<CharType>
-			&& std::is_pointer_v<T>
-			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
-			, const void*
-			>
-			GetValue(const T obj)
-		{
-			return (const void*)obj;
-		}
-
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t <
-			type_trait::Is_CharType_V<CharType>
-			&& std::is_pointer_v<T>
-			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
-			, const void*>
-			GetValuePtr(const T obj)
-		{
-			return (const void*)obj;
-		}
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		// C string ptrs
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t<
-			type_trait::Is_CharType_V<CharType>
-			&& std::is_pointer_v<T>
-			&& std::is_same_v<CharType, ONLY_TYPE(T)>
-			&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
-			, const T
-			>
-			GetValue(const T obj)
-		{
-			return obj;
-		}
-
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t <
-			type_trait::Is_CharType_V<CharType>
-			&& std::is_pointer_v<T>
-			&& std::is_same_v<CharType, ONLY_TYPE(T)>
-			&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
-			, const T*>
-			GetValuePtr(const T obj)
-		{
-			return &obj;
-		}
-
-		template<typename CharType, typename T, size_t Size>
-		constexpr
-			std::enable_if_t <
-			type_trait::Is_CharType_V<CharType>
-			&& std::is_pointer_v<T>
-			&& std::is_same_v<CharType, ONLY_TYPE(T)>
-			&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& !type_trait::Is_StringType_V<ONLY_TYPE(T)>
-			, const T>
-			GetValuePtr(const T (&obj)[Size])
-		{
-			return &obj;
-		}
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		// Primitive types (int, double, unsigned long long,...)
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t<
-			type_trait::Is_CharType_V<CharType>
-			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& std::is_arithmetic_v<T>
-			&& !std::is_same_v<CharType, ONLY_TYPE(T)>
-			&& !std::is_pointer_v<T>
-			, T
-			>
-			GetValue(T obj)
-		{
-			return obj;
-		}
-
-
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t <
-			type_trait::Is_CharType_V<CharType>
-			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& std::is_arithmetic_v<T>
-			&& !std::is_same_v<CharType, ONLY_TYPE(T)>
-			&& !std::is_pointer_v<T>
-			, const T*>
-			GetValuePtr(const T& obj)
-		{
-			return &obj;
-		}
-
-		template<typename CharType, typename T, size_t Size>
-		constexpr
-			std::enable_if_t <
-			type_trait::Is_CharType_V<CharType>
-			&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
-			&& std::is_arithmetic_v<T>
-			&& !std::is_same_v<CharType, ONLY_TYPE(T)>
-			&& !std::is_pointer_v<T>
-			, const T>
-			GetValuePtr(const T(&obj)[Size])
-		{
-			return &obj;
-		}
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		// Non-primitive custom types - Must have a function ToString that returns a C++ STL string type
-		// Non-primitive types
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t<
-			type_trait::Is_CharType_V<CharType>
-			&& !std::is_arithmetic_v<std::decay_t<T>>
-			&& !type_trait::Is_StringType_V<T>
-			&& !std::is_pointer_v<std::decay_t<T>>
-			, const CharType*
-			>
-			GetValue(const T& obj)
-		{
-			return GetValue<CharType>(obj.ToString());
-		}
-
-		template<typename CharType, typename T>
-		constexpr
-			std::enable_if_t <
-			type_trait::Is_CharType_V<CharType>
-			&& !std::is_arithmetic_v<std::decay_t<T>>
-			&& !type_trait::Is_StringType_V<T>
-			&& !std::is_pointer_v<std::decay_t<T>>
-			, const std::basic_string<CharType>*>
-			GetValuePtr(const T& obj)
-		{
-			static std::vector<std::basic_string<CharType>> list;
-			list.push_back(obj.ToString());
-			return &list.back();
-		}
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-
 		template<typename CharType, std::size_t Size>
 		std::deque<std::pair<unsigned char, std::string>> CreateIdentifiers(std::basic_string<CharType>& fmt, std::array<std::any, Size>& elems)
 		{
@@ -265,10 +75,11 @@ namespace klib {
 
 			if (auto pfSymPos = format.find(printfSymbol); pfSymPos != npos)
 			{
-				return stringify::Sprintf<CharType>(format, GetValue<CharType>(arg), GetValue<CharType>(argPack)...);
+				return stringify::Sprintf<CharType>(format, stringify::Identity<CharType>(arg), stringify::Identity<CharType>(argPack)...);
 			}
 
-			std::array<std::any, std::variant_size_v<DataTypes> -1> elems = { GetValuePtr<CharType, T>(arg), GetValuePtr<CharType, Ts>(argPack)... };
+			std::array<std::any, std::variant_size_v<DataTypes> -1> elems = { stringify::IdentityPtr<CharType, T>(arg)
+				, stringify::IdentityPtr<CharType, Ts>(argPack)... };
 
 			std::basic_string<CharType> fmt(format);
 			std::deque<std::pair<unsigned char, std::string>> identifiers = CreateIdentifiers(fmt, elems);

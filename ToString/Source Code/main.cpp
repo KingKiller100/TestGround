@@ -2,15 +2,44 @@
 
 #include <iostream>
 
+template<class CharType, typename = std::enable_if_t<klib::type_trait::Is_CharType_V<CharType>>>
+struct DummyString
+{
+	using String = std::basic_string<CharType>;
+	String string;
+
+	DummyString(String&& text)
+		: string(std::forward<String>(text))
+	{}
+
+	template<size_t Size>
+	DummyString(CharType (&text)[Size])
+		: string(text)
+	{}
+
+	DummyString(const CharType* text)
+		: string(text)
+	{}
+
+	String ToString() const
+	{
+		return string;
+	}
+};
+
 int main()
 {
 	const auto* const txt = "test txt";
 	const auto ull = 8680488060ull;
 	bool res = false;
 
+	DummyString<char> dummy("Get Money Fuck Bitches");
+	
 	const std::string s("pudding");
 
-	const auto l = klib::GetValuePtr<char>(txt);
+	auto type = klib::kFormat::stringify::Identity<char>(dummy);
+	
+	const auto l = klib::stringify::Identity<char>(txt);
 	
 	constexpr auto k = klib::type_trait::Is_CharType_V<decltype(txt)>;
 	for (auto i = 0ull; i < 5; ++i)
