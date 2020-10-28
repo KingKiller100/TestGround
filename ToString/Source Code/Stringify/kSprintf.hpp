@@ -15,7 +15,7 @@
 namespace klib::kFormat::stringify
 {
 	template<typename CharType, typename T, typename ...Ts>
-	constexpr std::basic_string<CharType> Sprintf(const std::basic_string_view<CharType>& format, T arg1, Ts ...argPack)
+	USE_RESULT constexpr std::basic_string<CharType> Sprintf(const std::basic_string_view<CharType>& format, T arg1, Ts ...argPack)
 	{
 		using SignedSize_t = std::make_signed_t<size_t>;
 		
@@ -41,7 +41,7 @@ namespace klib::kFormat::stringify
 		else
 		{
 			const auto fmt = kString::Convert<wchar_t>(format);
-			const auto str = MakeStringFromData<wchar_t>(fmt, arg1, argPack...);
+			const auto str = Sprintf<wchar_t>(fmt, arg1, argPack...);
 			const auto text = kString::Convert<CharType>(str);
 			return text;
 		}

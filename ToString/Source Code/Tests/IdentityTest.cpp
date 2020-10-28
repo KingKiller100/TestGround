@@ -125,6 +125,15 @@ namespace test
 		}
 
 		{
+			const auto* scp = "raw string";
+			const auto& obj = scp;
+			const auto* ret = IdentityPtr<char>(obj);
+			result &= std::is_same_v<
+				const char* const*,
+				decltype(ret)>;
+		}
+
+		{
 			const auto scope = 500;
 			const auto* obj = &scope;
 			const auto* ret = IdentityPtr<char>(obj);
@@ -137,7 +146,7 @@ namespace test
 			const unsigned long obj[] = { 1, 2, 4 };
 			auto ret = IdentityPtr<char>(obj);
 			result &= std::is_same_v<
-				decltype((&obj[0])),
+				const unsigned long* const*,
 				decltype(ret)>;
 		}
 

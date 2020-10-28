@@ -15,7 +15,7 @@ namespace klib::kFormat::stringify
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
 		&& type_trait::Is_StringType_V<T>
-		&& std::is_same_v<CharType, typename T::value_type>
+		// && std::is_same_v<CharType, typename T::value_type>
 		, const typename T::value_type*
 		>
 		Identity(const T& str)
@@ -28,7 +28,7 @@ namespace klib::kFormat::stringify
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
 		&& type_trait::Is_StringType_V<T>
-		&& std::is_same_v<CharType, typename ONLY_TYPE(T)::value_type>
+		//&& std::is_same_v<CharType, typename T::value_type>
 		, const T*
 		>
 		IdentityPtr(const T& str)
@@ -72,7 +72,7 @@ namespace klib::kFormat::stringify
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
 		&& std::is_arithmetic_v<T>
-		&& !std::is_pointer_v<T>
+		//&& !std::is_pointer_v<T>
 		, T
 		>
 		Identity(T obj)
@@ -86,7 +86,7 @@ namespace klib::kFormat::stringify
 		std::enable_if_t <
 		type_trait::Is_CharType_V<CharType>
 		&& std::is_arithmetic_v<T>
-		&& std::is_pointer_v<T>
+		//&& std::is_pointer_v<T>
 		, const T*>
 		IdentityPtr(const T& obj)
 	{
@@ -134,6 +134,7 @@ namespace klib::kFormat::stringify
 		&& !std::is_arithmetic_v<T>
 		&& !type_trait::Is_StringType_V<T>
 		&& !std::is_pointer_v<T>
+		&& !std::is_array_v<T>
 		, const CharType*
 		>
 		Identity(const T& obj)
@@ -150,10 +151,12 @@ namespace klib::kFormat::stringify
 		&& !std::is_arithmetic_v<T>
 		&& !type_trait::Is_StringType_V<T>
 		&& !std::is_pointer_v<T>
+		&& !std::is_array_v<T>
 		, const std::basic_string<CharType>*>
 		IdentityPtr(const T& obj)
 	{
-		static std::vector<std::basic_string<CharType>> storage;
+		static std::vector<std::basic_string<CharType>> storage =
+			decltype(storage)();
 		const auto& value = storage.emplace_back(obj.ToString());
 		return &value;
 	}
