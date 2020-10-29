@@ -21,8 +21,11 @@
 namespace klib {
 	namespace kFormat
 	{
+		using IdentifierPair = std::pair<std::uint16_t, std::string>;
+		using IDPairQueue = std::deque<std::pair<std::uint16_t, std::string>>;
+		
 		template<typename CharType, std::size_t Size>
-		std::deque<std::pair<unsigned char, std::string>> CreateIdentifiers(std::basic_string<CharType>& fmt, std::array<std::any, Size>& elems)
+		IDPairQueue CreateIdentifiers(std::basic_string<CharType>& fmt, std::array<std::any, Size>& elems)
 		{
 			static constexpr auto openerSymbol = CharType('{');
 			static constexpr auto closerSymbol = CharType('}');
@@ -30,7 +33,7 @@ namespace klib {
 			static constexpr auto nullTerminator = type_trait::s_NullTerminator<CharType>;
 			static constexpr auto npos = std::basic_string<CharType>::npos;
 
-			std::deque<std::pair<unsigned char, std::string>> identifiers;
+			IDPairQueue identifiers;
 			for (auto openerPos = fmt.find_first_of(openerSymbol);
 				openerPos != npos;
 				openerPos = fmt.find_first_of(openerSymbol, openerPos + 1))
@@ -45,11 +48,13 @@ namespace klib {
 				}
 
 				const auto closePos = fmt.find_first_of(closerSymbol, openerPos);
-				std::string bracket = kString::Convert<char>(fmt.substr(openerPos + 1, closePos - 1));
+				const auto digits = closePos - openerPos - 1;
+				const auto current = fmt.substr(openerPos + 1, digits);
+				std::string bracketContents = kString::Convert<char>(current);
 
-				const auto relativeColonPos = bracket.find_first_of(precisionSymbol);
-				const auto optionIndex = bracket.substr(0, relativeColonPos);
-				const auto idx = static_cast<unsigned char>(std::stoi(optionIndex));
+				const auto relativeColonPos = bracketContents.find_first_of(precisionSymbol);
+				const auto optionIndex = bracketContents.substr(0, relativeColonPos);
+				const auto idx = static_cast<IdentifierPair::first_type>(std::stoi(optionIndex));
 				const auto type = elems[idx].type().name();
 
 				identifiers.push_back(std::make_pair(idx, type));
@@ -61,7 +66,7 @@ namespace klib {
 
 		// Outputs a interpolated string with data given for all string types. NOTE: Best performance with char and wchar_t type strings
 		template<class CharType, typename T, typename ...Ts>
-		USE_RESULT constexpr std::basic_string<CharType> ToString(const std::basic_string_view<CharType>& format, const T& arg, const Ts& ...argPack)
+		USE_RESULT constexpr std::basic_string<CharType> ToString(const std::basic_string_view<CharType>& format, T arg, Ts ...argPack)
 		{
 			using namespace kString;
 			using DataTypes = std::variant<std::monostate, T, Ts...>;
@@ -82,7 +87,7 @@ namespace klib {
 				, stringify::IdentityPtr<CharType, Ts>(argPack)... };
 
 			std::basic_string<CharType> fmt(format);
-			std::deque<std::pair<unsigned char, std::string>> identifiers = CreateIdentifiers(fmt, elems);
+			IDPairQueue identifiers = CreateIdentifiers(fmt, elems);
 
 			std::basic_string<CharType> finalString;
 			for (const auto& id : identifiers)
@@ -102,43 +107,50 @@ namespace klib {
 
 				currentSection.erase(replacePos);
 
-				if (HasString(type, "void"))
+				if (Count(type, '*') > 1)
 				{
-					auto data = std::any_cast<const void*>(val);
-					currentSection.append(stringify::StringifyPointer<CharType>(data, padding));
-					finalString.append(currentSection);
+					if (Contains(type, "char"))
+					{
+						const auto data = std::any_cast<const CharType* const*>(val);
+						currentSection.append(*data);
+						finalString.append(currentSection);
+					}
+					else
+					{
+						auto data = std::any_cast<const void* const*>(val);
+						currentSection.append(stringify::StringifyPointer<CharType>(*data, padding));
+						finalString.append(currentSection);
+					}
 				}
-				else if (HasString(type, "basic_string_view"))
+				else if (Contains(type, "basic_string_view"))
 				{
 					const auto data = std::any_cast<const std::basic_string_view<CharType>*>(val);
-					currentSection.erase(replacePos);
-					currentSection.insert(replacePos, data->data());
+					currentSection.append(*data);
 					finalString.append(currentSection);
 				}
-				else if (HasString(type, "basic_string"))
+				else if (Contains(type, "basic_string"))
 				{
 					const auto data = std::any_cast<const std::basic_string<CharType>*>(val);
-					currentSection.erase(replacePos);
-					currentSection.insert(replacePos, data->data());
+					currentSection.append(*data);
 					finalString.append(currentSection);
 				}
-				else if (HasString(type, "unsigned"))
+				else if (Contains(type, "unsigned"))
 				{
-					if (HasString(type, "char"))
+					if (Contains(type, "char"))
 					{
 						auto data = std::any_cast<const unsigned char*>(val);
 						currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
 						finalString.append(currentSection);
 					}
-					else if (HasString(type, "short"))
+					else if (Contains(type, "short"))
 					{
 						auto data = std::any_cast<const unsigned short*>(val);
 						currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
 						finalString.append(currentSection);
 					}
-					else if (HasString(type, "int"))
+					else if (Contains(type, "int"))
 					{
-						if (HasString(type, "__int64"))
+						if (Contains(type, "__int64"))
 						{
 							auto data = std::any_cast<const unsigned __int64*>(val);
 							currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
@@ -151,9 +163,9 @@ namespace klib {
 							finalString.append(currentSection);
 						}
 					}
-					else if (HasString(type, "long"))
+					else if (Contains(type, "long"))
 					{
-						if (HasString(type, "long long"))
+						if (Contains(type, "long long"))
 						{
 							auto data = std::any_cast<const unsigned long long*>(val);
 							currentSection.append(stringify::StringUnsignedIntegral<CharType>(*data, padding));
@@ -167,21 +179,21 @@ namespace klib {
 						}
 					}
 				}
-				else if (HasString(type, "long"))
+				else if (Contains(type, "long"))
 				{
-					if (HasString(type, "double"))
+					if (Contains(type, "double"))
 					{
 						auto data = std::any_cast<const long double*>(val);
 						currentSection += stringify::StringFloatingPoint<CharType>(*data, padding);
 						finalString.append(currentSection);
 					}
-					else if (HasString(type, "int"))
+					else if (Contains(type, "int"))
 					{
 						auto data = std::any_cast<const long int*>(val);
 						currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
 						finalString.append(currentSection);
 					}
-					else if (HasString(type, "long long"))
+					else if (Contains(type, "long long"))
 					{
 						const auto data = std::any_cast<const long long*>(val);
 						currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
@@ -194,22 +206,21 @@ namespace klib {
 						finalString.append(currentSection);
 					}
 				}
-				else if (HasString(type, "char"))
+				else if (Contains(type, "char"))
 				{
 					const auto data = std::any_cast<const CharType*>(val);
-					currentSection.erase(replacePos);
-					currentSection.insert(replacePos, data);
+					currentSection.push_back(*data);
 					finalString.append(currentSection);
 				}
-				else if (HasString(type, "short"))
+				else if (Contains(type, "short"))
 				{
 					auto data = std::any_cast<const short*>(val);
 					currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
 					finalString.append(currentSection);
 				}
-				else if (HasString(type, "int"))
+				else if (Contains(type, "int"))
 				{
-					if (HasString(type, "__int64"))
+					if (Contains(type, "__int64"))
 					{
 						auto data = std::any_cast<const __int64*>(val);
 						currentSection += stringify::StringSignedIntegral<CharType>(*data, padding);
@@ -222,19 +233,19 @@ namespace klib {
 						finalString.append(currentSection);
 					}
 				}
-				else if (HasString(type, "double"))
+				else if (Contains(type, "double"))
 				{
 					const auto data = std::any_cast<const double*>(val);
 					currentSection += stringify::StringFloatingPoint<CharType>(*data, padding);
 					finalString.append(currentSection);
 				}
-				else if (HasString(type, "float"))
+				else if (Contains(type, "float"))
 				{
 					const auto data = std::any_cast<const float*>(val);
 					currentSection.append(stringify::StringFloatingPoint<CharType>(*data, padding));
 					finalString.append(currentSection);
 				}
-				else if (HasString(type, "bool"))
+				else if (Contains(type, "bool"))
 				{
 					const auto res = std::any_cast<const bool*>(val);
 					currentSection.append(stringify::StringBool<CharType>(*res));

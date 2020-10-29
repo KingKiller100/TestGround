@@ -55,12 +55,27 @@ namespace klib::kFormat::stringify
 	constexpr
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
+		&& type_trait::Is_CharType_V<ONLY_TYPE(T)>
+		&& std::is_same_v<CharType, ONLY_TYPE(T)>
 		&& std::is_pointer_v<T>
 		, const T*
 		>
 		IdentityPtr(const T& obj)
 	{
 		return &obj;
+	}
+
+	template<typename CharType, typename T>
+	constexpr
+		std::enable_if_t<
+		type_trait::Is_CharType_V<CharType>
+		&& !type_trait::Is_CharType_V<ONLY_TYPE(T)>
+		&& std::is_pointer_v<T>
+		, const void* const*
+		>
+		IdentityPtr(const T& obj)
+	{
+		return (const void* const*)&obj;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////

@@ -26,22 +26,22 @@ namespace klib::kFormat::stringify
 		if (precision == nPrecision)
 			precision = sizeof(size_t) * 2;
 		
-		kString::StringWriter<CharType> str;
-		auto dec_num = (size_t)ptr;
+		kString::StringWriter<CharType> address;
+		auto asUint = reinterpret_cast<uintptr_t>(ptr);
 		
-		while (dec_num > 0)
+		while (asUint > 0)
 		{
-			const auto index = dec_num % hex<CharType>.size();
-			str.insert(str.begin(), hex<CharType>.at(index));
-			dec_num /= hex<CharType>.size();
+			const auto index = asUint % hex<CharType>.size();
+			address.insert(address.begin(), hex<CharType>.at(index));
+			asUint /= hex<CharType>.size();
 		}
 		
-		if (precision > str.size())
+		if (precision > address.size())
 		{
-			const auto count = precision - str.size();
-			str.insert(str.begin(), count, '0');
+			const auto count = precision - address.size();
+			address.insert(address.begin(), count, '0');
 		}
 		
-		return str;
+		return address;
 	}
 }

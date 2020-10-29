@@ -120,18 +120,41 @@ namespace klib::kString
 	}
 	
 	template<typename StringType, typename = std::enable_if_t<type_trait::Is_StringType_V<StringType>>>
-	USE_RESULT constexpr bool HasString(const StringType& str, const typename StringType::value_type* search)
+	USE_RESULT constexpr bool Contains(const StringType& str, const typename StringType::value_type* search)
 	{
 		return str.find(search) != StringType::npos;
 	}
 
 	template<typename StringA,typename StringB, typename = std::enable_if_t<
 		type_trait::Is_StringType_V<StringA>
-		|| type_trait::Is_StringType_V<StringB>
+		&& type_trait::Is_StringType_V<StringB>
 	>>
-	USE_RESULT constexpr bool HasString(const StringA& str, const StringB& search)
+	USE_RESULT constexpr bool Contains(const StringA& str, const StringB& search)
 	{
-		return str.find(search) != StringA::npos;
+		return str.find(search.data()) != StringA::npos;
+	}
+
+	template<typename StringType, typename Stringish
+	, typename = std::enable_if_t<
+		type_trait::Is_StringType_V<StringType>
+		&& (type_trait::Is_StringType_V<StringType>
+			|| (type_trait::Is_CharType_V<ONLY_TYPE(Stringish)>
+				&& std::is_same_v<typename StringType::value_type, Stringish>
+				&& std::is_pointer_v<Stringish>)
+			)
+			>>
+	USE_RESULT constexpr size_t Count(const StringType& str, const Stringish search)
+	{
+		size_t count = 0;
+		
+		for (auto currentPos = str.find_first_of(search);
+			currentPos != StringType::npos;
+			currentPos = str.find_first_of(search, currentPos + 1))
+		{
+			++count;
+		}
+		
+		return count;
 	}
 }
 
