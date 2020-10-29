@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "Tests/IdentityTest.hpp"
+
 template<class CharType, typename = std::enable_if_t<klib::type_trait::Is_CharType_V<CharType>>>
 struct DummyString
 {
@@ -33,7 +35,7 @@ int main()
 	const auto ull = 8680488060ull;
 	bool res = false;
 
-	DummyString<char> dummy("Get Money Fuck Bitches");
+	const DummyString<char> dummy("Get Money Fuck Bitches");
 	
 	const std::string s("pudding");
 
@@ -41,10 +43,13 @@ int main()
 	constexpr std::string_view search("*");
 
 	constexpr auto count = klib::kString::Count(data, '*');
+
+	test::IdentityTest::Run();
+
 	
 	for (auto i = 0ull; i < 5; ++i)
 	{
-		const auto str = klib::kFormat::ToString("0x{0}: {1:2}: {2:5} - {3} - {4}\n", dummy, ull, 120.985f, 24, false);
+		const auto str = klib::kFormat::ToString("{0}: {1:2}: {2:5} - {3} - {4}\n", dummy, ull, 120.985f, 24, false);
 		const auto str0 = klib::kFormat::ToString("{0}: {1:2}\n", "w", 120.0f);
 		const auto str1 = klib::kFormat::ToString("{0} {1:2}: string {1} {3} {2:4} \n", txt, 120.0f, 60u, res);
 		 const auto str2 = klib::kFormat::ToString("%s %s string %f %u", txt, "foo", 120.0, 60u);
@@ -54,11 +59,10 @@ int main()
 		res = !res;
 
 		std::cout << str << '\n';
-		// std::cout << str2 << '\n';
-		// std::wcout << str3 << '\n';
-		// std::cout.wr << str4 << '\n';
+		std::cout << str2 << '\n';
+		std::wcout << str3 << '\n';
 	}
-	//std::wcout << str << std::endl;
+
 	std::cin.get();
 	return EXIT_SUCCESS;
 }

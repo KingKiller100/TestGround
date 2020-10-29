@@ -15,11 +15,13 @@ namespace klib::kFormat::stringify
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
 		&& type_trait::Is_StringType_V<T>
-		// && std::is_same_v<CharType, typename T::value_type>
 		, const typename T::value_type*
 		>
 		Identity(const T& str)
 	{
+		static_assert(std::is_same_v<CharType, typename T::value_type>, 
+			"Must be a string type that contains the same character types as CharType "
+			"i.e. std::string -> char, std::u16string -> char16_t");
 		return str.data();
 	}
 
@@ -28,11 +30,13 @@ namespace klib::kFormat::stringify
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
 		&& type_trait::Is_StringType_V<T>
-		//&& std::is_same_v<CharType, typename T::value_type>
 		, const T*
 		>
 		IdentityPtr(const T& str)
 	{
+		static_assert(std::is_same_v<CharType, typename T::value_type>,
+			"Must be a string type that contains the same character types as CharType "
+			"i.e. std::string -> char, std::u16string -> char16_t");
 		return &str;
 	}
 
@@ -51,6 +55,7 @@ namespace klib::kFormat::stringify
 		return obj;
 	}
 
+	// Character pointer types returned as pointer type
 	template<typename CharType, typename T>
 	constexpr
 		std::enable_if_t<
@@ -65,6 +70,7 @@ namespace klib::kFormat::stringify
 		return &obj;
 	}
 
+	// Cast non-characters pointer as void pointer
 	template<typename CharType, typename T>
 	constexpr
 		std::enable_if_t<
@@ -87,7 +93,6 @@ namespace klib::kFormat::stringify
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
 		&& std::is_arithmetic_v<T>
-		//&& !std::is_pointer_v<T>
 		, T
 		>
 		Identity(T obj)
@@ -101,7 +106,6 @@ namespace klib::kFormat::stringify
 		std::enable_if_t <
 		type_trait::Is_CharType_V<CharType>
 		&& std::is_arithmetic_v<T>
-		//&& std::is_pointer_v<T>
 		, const T*>
 		IdentityPtr(const T& obj)
 	{
@@ -172,7 +176,13 @@ namespace klib::kFormat::stringify
 	{
 		static std::vector<std::basic_string<CharType>> storage =
 			decltype(storage)();
-		const auto& value = storage.emplace_back(obj.ToString());
+		const auto string = obj.ToString();
+
+		auto iter = std::find(storage.begin(), storage.end(), string);
+		if (iter != storage.end())
+			return &(*iter);
+		
+		const auto& value = storage.emplace_back(string);
 		return &value;
 	}
 }
