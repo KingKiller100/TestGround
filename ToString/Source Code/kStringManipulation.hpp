@@ -6,13 +6,16 @@
 #include "StringTypeTraits.hpp"
 
 #include <algorithm>
+#include <vcruntime_typeinfo.h>
+#include <cmath>
+#include <regex>
 #include <vector>
 
 namespace klib::kString
 {
 	enum class PreserveToken { YES, NO, };
 	enum class PreserveEmpty { YES, NO, };
-	
+
 	template<class Char = char>
 	USE_RESULT constexpr StringWriter<Char> Replace(const StringReader<Char>& str, const ONLY_TYPE(Char) oldChar, const ONLY_TYPE(Char) newChar) noexcept
 	{
@@ -46,7 +49,7 @@ namespace klib::kString
 
 		const auto keepToken = (preserveToken == PreserveToken::YES);
 		const auto keepEmpty = (preserveEmpty == PreserveEmpty::YES);
-		
+
 		std::vector<StrW> lines;
 
 		size_t prevPos = 0;
@@ -72,10 +75,10 @@ namespace klib::kString
 	template<class Char = char>
 	USE_RESULT constexpr Char* ToUpper(const Char* input)
 	{
-		using StrR = StringReader<Char> ;
+		using StrR = StringReader<Char>;
 		StrR in(input);
 		Char* output = new Char[in.length() + 1]{};
-		
+
 		for (auto i = 0; i < in.length(); ++i)
 		{
 			Char c = in[i];
@@ -91,10 +94,10 @@ namespace klib::kString
 	template<class Char = char>
 	USE_RESULT constexpr Char* ToLower(const Char* input)
 	{
-		using StrR = StringReader<Char> ;
+		using StrR = StringReader<Char>;
 		StrR in(input);
 		Char* output = new Char[in.length() + 1]{};
-		
+
 		for (auto i = 0; i < in.length(); ++i)
 		{
 			Char c = in[i];
@@ -118,43 +121,108 @@ namespace klib::kString
 	{
 		return ToLower<typename T::value_type>(input.data());
 	}
-	
+
 	template<typename StringType, typename = std::enable_if_t<type_trait::Is_StringType_V<StringType>>>
-	USE_RESULT constexpr bool Contains(const StringType& str, const typename StringType::value_type* search)
+	USE_RESULT constexpr bool Contains(const StringType& str, const typename StringType::value_type* search
+		, const size_t offset = 0)
 	{
-		return str.find(search) != StringType::npos;
+		return str.find(search, offset) != StringType::npos;
 	}
 
-	template<typename StringA,typename StringB, typename = std::enable_if_t<
+	template<typename StringType, typename = std::enable_if_t<type_trait::Is_StringType_V<StringType>>>
+	USE_RESULT constexpr bool Contains(const StringType& str, typename StringType::value_type search
+		, const size_t offset = 0)
+	{
+		return str.find(search, offset) != StringType::npos;
+	}
+
+	template<typename StringA, typename StringB, typename = std::enable_if_t<
 		type_trait::Is_StringType_V<StringA>
 		&& type_trait::Is_StringType_V<StringB>
-	>>
-	USE_RESULT constexpr bool Contains(const StringA& str, const StringB& search)
+		>>
+		USE_RESULT constexpr bool Contains(const StringA& str, const StringB& search
+			, const size_t offset = 0)
 	{
-		return str.find(search.data()) != StringA::npos;
+		return str.find(search.data(), offset) != StringA::npos;
 	}
 
 	template<typename StringType, typename Stringish
-	, typename = std::enable_if_t<
+		, typename = std::enable_if_t<
 		type_trait::Is_StringType_V<StringType>
 		&& (type_trait::Is_StringType_V<StringType>
 			|| (type_trait::Is_CharType_V<ONLY_TYPE(Stringish)>
 				&& std::is_same_v<typename StringType::value_type, Stringish>
 				&& std::is_pointer_v<Stringish>)
 			)
-			>>
-	USE_RESULT constexpr size_t Count(const StringType& str, const Stringish search)
+		>>
+		USE_RESULT constexpr size_t Count(const StringType& str, const Stringish search)
 	{
 		size_t count = 0;
-		
+
 		for (auto currentPos = str.find_first_of(search);
 			currentPos != StringType::npos;
 			currentPos = str.find_first_of(search, currentPos + 1))
 		{
 			++count;
 		}
-		
+
 		return count;
+	}
+
+	template<class Integer, typename StringType
+		, typename = std::enable_if_t<
+		type_trait::Is_StringType_V<StringType>
+		&& std::is_integral_v<Integer>
+		>>
+		constexpr Integer StrTo(StringType string)
+	{
+		using CharType = typename StringType::value_type;
+
+		const auto CrashFunc = [](const std::string& errMsg) { throw std::runtime_error(errMsg); };
+
+		std::regex r("\\s+");
+		string = std::regex_replace(string, r, "");
+		
+		if (string.empty())
+			CrashFunc("Cannot convert empty string to integer number");
+		if (kString::Contains(string, CharType('.')))
+			CrashFunc("string must contain only one integer number");
+
+		const auto isNeg = std::is_signed_v<Integer>
+			&& string[0] == CharType('-');
+
+		if (isNeg)
+			string.erase(string.begin(), string.begin() + 1);
+		
+		Integer result = 0;
+		size_t size = string.size();
+		auto magnitude = static_cast<size_t>(std::pow(10, size - 1));
+
+		if (size > std::numeric_limits<Integer>::digits10)
+		{
+			const std::string type = typeid(result).name();
+			const auto msg = "String contains more digits than largest number of type: "
+				+ type;
+			CrashFunc(msg);
+		}
+
+		for (const auto& digitChr : string)
+		{
+			if (CharType('0') > digitChr
+				|| CharType('9') < digitChr)
+				CrashFunc("String must only contain digits");
+
+			const auto digit = static_cast<size_t>(digitChr - CharType('0'));
+			const auto asInt = digit * magnitude;
+
+			result += static_cast<Integer>(asInt);
+			magnitude /= 10;
+		}
+
+		if (isNeg)
+			result *= -1;
+
+		return result;
 	}
 }
 

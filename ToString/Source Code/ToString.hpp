@@ -53,13 +53,12 @@ namespace klib {
 
 				const auto relativeColonPos = bracketContents.find_first_of(precisionSymbol);
 				const auto optionIndex = bracketContents.substr(0, relativeColonPos);
-				const auto idx = static_cast<IdentifierPair::first_type>(std::stoi(optionIndex));
+				const auto idx = kString::StrTo<IdentifierPair::first_type>(optionIndex);
 				if (elems.size() <= idx)
 				{
 					const auto convertedFmt = kString::Convert<char>(fmt);
 					const auto errMsg = "Index given is larger than the number of objects given for string formatting\n"
-						"Please check your format again: " + convertedFmt + "\n";
-						"Index: " + optionIndex ;
+						"Please check your format again: " + convertedFmt + "\n" "Index: " + optionIndex ;
 					throw std::out_of_range(errMsg);
 				}
 				
@@ -285,9 +284,8 @@ namespace klib {
 		template<class CharType, typename T>
 		constexpr std::basic_string<CharType> ToString(T&& object)
 		{
-			std::basic_stringstream<CharType> ss;
-			ss << std::forward<T>(object);
-			return ss.str();
+			const auto s = ToString("{0}", object);
+			return s;
 		}
 	}
 

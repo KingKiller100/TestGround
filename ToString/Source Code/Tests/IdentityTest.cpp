@@ -8,31 +8,6 @@ namespace test
 
 	bool result = true;
 
-	template<class CharType, typename = std::enable_if_t<klib::type_trait::Is_CharType_V<CharType>>>
-	struct DummyString
-	{
-		using String = std::basic_string<CharType>;
-		String string;
-
-		DummyString(String&& text)
-			: string(std::forward<String>(text))
-		{}
-
-		template<size_t Size>
-		DummyString(CharType(&text)[Size])
-			: string(text)
-		{}
-
-		DummyString(const CharType* text)
-			: string(text)
-		{}
-
-		String ToString() const
-		{
-			return string;
-		}
-	};
-
 	bool IdentityTest::Run()
 	{
 		return RunIdentityTest()
