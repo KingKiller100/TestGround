@@ -138,7 +138,7 @@ namespace test
 			const auto* obj = &scope;
 			const auto* ret = IdentityPtr<char>(obj);
 			result &= std::is_same_v<
-				const decltype(500)* const*,
+				const void* const*,
 				decltype(ret)>;
 		}
 

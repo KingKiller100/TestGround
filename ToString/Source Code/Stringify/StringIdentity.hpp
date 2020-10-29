@@ -147,6 +147,22 @@ namespace klib::kFormat::stringify
 	/// "data()" function which returns a const CharType pointer
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	template<typename CharType, typename T>
+	const std::basic_string<CharType>& GetObjectString(const T& obj)
+	{
+		static std::vector<std::basic_string<CharType>> storage =
+			decltype(storage)();
+		
+		const auto string = obj.ToString();
+
+		auto iter = std::find(storage.begin(), storage.end(), string);
+		if (iter != storage.end())
+			return (*iter);
+
+		const std::basic_string<CharType>& value = storage.emplace_back(string);
+		return value;
+	}
+	
+	template<typename CharType, typename T>
 	constexpr
 		std::enable_if_t<
 		type_trait::Is_CharType_V<CharType>
@@ -158,9 +174,8 @@ namespace klib::kFormat::stringify
 		>
 		Identity(const T& obj)
 	{
-		static std::vector<const CharType*> storage = decltype(storage)();
-		const auto& value = storage.emplace_back(obj.ToString().data());
-		return value;
+		const std::basic_string<CharType>& string = GetObjectString<CharType>(obj);
+		return string.data();
 	}
 
 	template<typename CharType, typename T>
@@ -174,15 +189,7 @@ namespace klib::kFormat::stringify
 		, const std::basic_string<CharType>*>
 		IdentityPtr(const T& obj)
 	{
-		static std::vector<std::basic_string<CharType>> storage =
-			decltype(storage)();
-		const auto string = obj.ToString();
-
-		auto iter = std::find(storage.begin(), storage.end(), string);
-		if (iter != storage.end())
-			return &(*iter);
-		
-		const auto& value = storage.emplace_back(string);
-		return &value;
+		const std::basic_string<CharType>& string = GetObjectString<CharType>(obj);
+		return &string;
 	}
 }

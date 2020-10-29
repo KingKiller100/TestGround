@@ -42,7 +42,8 @@ int main()
 	constexpr std::string_view data("*blue*");
 	constexpr std::string_view search("*");
 
-	constexpr auto count = klib::kString::Count(data, '*');
+	const auto id = klib::kFormat::stringify::Identity<char>(dummy);
+	const auto idPtr = klib::kFormat::stringify::IdentityPtr<char>(dummy);
 
 	test::IdentityTest::Run();
 
