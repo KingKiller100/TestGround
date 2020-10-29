@@ -41,20 +41,19 @@ int main()
 
 	constexpr std::string_view data("*blue*");
 	constexpr std::string_view search("*");
+	const unsigned num = 189;
 
-	const auto id = klib::kFormat::stringify::Identity<char>(dummy);
-	const auto idPtr = klib::kFormat::stringify::IdentityPtr<char>(dummy);
-
-	test::IdentityTest::Run();
+	if (!test::IdentityTest::Run())
+		throw std::exception();
 
 	
 	for (auto i = 0ull; i < 5; ++i)
 	{
-		const auto str = klib::kFormat::ToString("{0}: {1:2}: {2:5} - {3} - {4}\n", dummy, ull, 120.985f, 24, false);
-		const auto str0 = klib::kFormat::ToString("{0}: {1:2}\n", "w", 120.0f);
-		const auto str1 = klib::kFormat::ToString("{0} {1:2}: string {1} {3} {2:4} \n", txt, 120.0f, 60u, res);
-		 const auto str2 = klib::kFormat::ToString("%s %s string %f %u", txt, "foo", 120.0, 60u);
-		const auto str3 = klib::kFormat::ToString(L"Const unsigned int pointer: 0x{0}", &res);
+		const auto str = klib::kFormat::ToString("{0}: {1:2}: {2:5} - {3} - {4}", dummy, ull, 120.985f, 24, false);
+		const auto str0 = klib::kFormat::ToString("{0}: {1:2} {2} 0x{3:8} {4}", "w", 120.0f, 'l', &dummy, search);
+		const auto str1 = klib::kFormat::ToString("{0} {1:2}: string {1} {3} {2:4}", txt, 120.75f, 60u, res);
+		const auto str2 = klib::kFormat::ToString("%s %s string %f %u %d %s", txt, "foo", 120.0, 60u, 100, data);
+		const auto str3 = klib::kFormat::ToString(L"Const unsigned int pointer: 0x{0}", &num);
 		const auto str4 = klib::kFormat::ToString(U"Bool pointer: 0x{0}", &res);
 
 		res = !res;
