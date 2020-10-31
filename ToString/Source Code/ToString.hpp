@@ -87,7 +87,7 @@ namespace klib {
 
 			if (auto pfSymPos = format.find(printfSymbol); pfSymPos != npos)
 			{
-				return stringify::Sprintf<CharType>(format, stringify::Identity<CharType>(arg), stringify::Identity<CharType>(argPack)...);
+				return stringify::Sprintf<CharType>(format, arg, argPack...);
 			}
 
 			std::array<std::any, std::variant_size_v<DataTypes> -1> elems = { stringify::IdentityPtr<CharType, T>(arg)
