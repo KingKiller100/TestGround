@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include "../kStringTypes.hpp"
-#include "../StringTypeTraits.hpp"
+#include "../../../Type Traits/StringTraits.hpp"
 
-namespace klib::kFormat::stringify
+namespace klib::kString::stringify
 {
 	template<class CharType, typename T
 		, typename = std::enable_if_t<std::is_same_v<T, bool>

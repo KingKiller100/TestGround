@@ -1,45 +1,46 @@
 #pragma once
 
-#include "StringTypeTraits.hpp"
-#include "StringConverter.hpp"
-
-#include "Stringify/StringIdentity.hpp"
 #include "Stringify/kSprintf.hpp"
-#include "Stringify/StringifyBool.hpp"
-#include "Stringify/StringifyInteger.hpp"
-#include "Stringify/StringifyPointer.hpp"
-#include "Stringify/StringifyFloatingPoint.hpp"
+#include "Stringify/kFormatMarkers.hpp"
+#include "Stringify/kStringIdentity.hpp"
+#include "Stringify/kStringifyBool.hpp"
+#include "Stringify/kStringifyFloatingPoint.hpp"
+#include "Stringify/kStringifyInteger.hpp"
+#include "Stringify/kStringifyPointer.hpp"
+
+#include "../../Type Traits/StringTraits.hpp"
+#include "../../Utility/String/kStringConverter.hpp"
 
 #include <any>
 #include <array>
-#include <deque>
 #include <string>
-#include <sstream>
 #include <variant>
 
+
 namespace klib {
-	namespace kFormat
+	namespace kString
 	{
-		using IdentifierPair = std::pair<std::uint16_t, std::string>;
-		using IDPairQueue = std::deque<std::pair<std::uint16_t, std::string>>;
-		
 		template<typename CharType, std::size_t Size>
-		IDPairQueue CreateIdentifiers(std::basic_string<CharType>& fmt, std::array<std::any, Size>& elems)
+		secret::helper::FormatMarkerQueue CreateIdentifiers(const std::basic_string<CharType>& fmt, std::array<std::any, Size>& elems)
 		{
+			using namespace secret::helper;
+
 			static constexpr auto openerSymbol = CharType('{');
 			static constexpr auto closerSymbol = CharType('}');
 			static constexpr auto precisionSymbol = CharType(':');
 			static constexpr auto nullTerminator = type_trait::s_NullTerminator<CharType>;
 			static constexpr auto npos = std::basic_string<CharType>::npos;
 
-			IDPairQueue identifiers;
-			for (auto openerPos = fmt.find_first_of(openerSymbol);
+			FormatMarkerQueue identifiers;
+			for (FormatMarker::PositionType openerPos = fmt.find_first_of(openerSymbol);
 				openerPos != npos;
 				openerPos = fmt.find_first_of(openerSymbol, openerPos + 1))
 			{
 				if (fmt[openerPos + 1] == openerSymbol ||
 					fmt[openerPos + 1] == CharType(' ') ||
 					fmt[openerPos + 1] == CharType('\t') ||
+					fmt[openerPos + 1] == CharType('\n') ||
+					fmt[openerPos + 1] == CharType('\r') ||
 					fmt[openerPos + 1] == nullTerminator)
 				{
 					openerPos += 2;
@@ -53,18 +54,18 @@ namespace klib {
 
 				const auto relativeColonPos = bracketContents.find_first_of(precisionSymbol);
 				const auto optionIndex = bracketContents.substr(0, relativeColonPos);
-				const auto idx = kString::StrTo<IdentifierPair::first_type>(optionIndex);
+				const auto idx = kString::StrTo<FormatMarker::IndexType>(optionIndex);
 				if (elems.size() <= idx)
 				{
 					const auto convertedFmt = kString::Convert<char>(fmt);
 					const auto errMsg = "Index given is larger than the number of objects given for string formatting\n"
-						"Please check your format again: " + convertedFmt + "\n" "Index: " + optionIndex ;
+						"Please check your format again: " + convertedFmt + "\n" "Index: " + optionIndex;
 					throw std::out_of_range(errMsg);
 				}
-				
-				const auto type = elems[idx].type().name();
 
-				identifiers.push_back(std::make_pair(idx, type));
+				const FormatMarker::NameType type = elems[idx].type().name();
+
+				identifiers.push_back(FormatMarker(idx, openerPos, type));
 			}
 			identifiers.shrink_to_fit();
 
@@ -75,7 +76,7 @@ namespace klib {
 		template<class CharType, typename T, typename ...Ts>
 		USE_RESULT constexpr std::basic_string<CharType> ToString(const std::basic_string_view<CharType>& format, T arg, Ts ...argPack)
 		{
-			using namespace kString;
+			using namespace secret::helper;
 			using DataTypes = std::variant<std::monostate, T, Ts...>;
 
 			static constexpr auto printfSymbol = CharType('%');
@@ -83,33 +84,35 @@ namespace klib {
 			static constexpr auto closerSymbol = CharType('}');
 			static constexpr auto precisionSymbol = CharType(':');
 			static constexpr auto nullTerminator = type_trait::s_NullTerminator<CharType>;
-			static constexpr auto npos = std::basic_string<CharType>::npos;
+			static constexpr auto npos = std::basic_string_view<CharType>::npos;
 
 			if (auto pfSymPos = format.find(printfSymbol); pfSymPos != npos)
 			{
-				return stringify::Sprintf<CharType>(format, arg, argPack...);
+				return stringify::SprintfWrapper<CharType>(format, arg, argPack...);
 			}
 
 			std::array<std::any, std::variant_size_v<DataTypes> -1> elems = { stringify::IdentityPtr<CharType, T>(arg)
 				, stringify::IdentityPtr<CharType, Ts>(argPack)... };
 
 			std::basic_string<CharType> fmt(format);
-			IDPairQueue identifiers = CreateIdentifiers(fmt, elems);
+			FormatMarkerQueue markers = CreateIdentifiers(ToWriter(format), elems);
 
 			std::basic_string<CharType> finalString;
-			for (const auto& id : identifiers)
+			size_t prevIndex = 0;
+			for (const auto& marker : markers)
 			{
-				const auto& val = elems[id.first];
-				const auto& type = id.second;
-				const auto inputPos = fmt.find_first_of(closerSymbol) + 1;
-				auto currentSection = fmt.substr(0, inputPos);
-				auto replacePos = currentSection.find_first_of(openerSymbol);
+				const auto& val = elems[marker.objIndex];
+				const auto& type = marker.type;
+				const auto inputPos = fmt.find_first_of(closerSymbol, prevIndex) + 1;
+				const auto endPos = inputPos - prevIndex;
+				auto currentSection = fmt.substr(prevIndex, endPos);
+				auto replacePos = marker.position - prevIndex;
 				auto colonPos = currentSection.find(precisionSymbol, replacePos);
 				size_t padding = stringify::nPrecision;
 
 				if (colonPos != npos)
 				{
-					padding = std::stoll(kString::Convert<char>(currentSection.substr(colonPos + 1, inputPos - 1)));
+					padding = StrTo<long long>(Convert<char>(currentSection.substr(colonPos + 1, inputPos - 1)));
 				}
 
 				currentSection.erase(replacePos);
@@ -263,14 +266,22 @@ namespace klib {
 					throw std::runtime_error("Type entered not recognised/supported");
 				}
 
-				fmt.erase(0, inputPos);
-				identifiers.pop_front();
+				prevIndex = inputPos;
+				markers.pop_front();
 			}
 
-			if (!fmt.empty())
-				finalString.append(fmt);
+			if (fmt.size() - 1 >= prevIndex)
+				finalString.append(fmt.substr(prevIndex));
 
 			return finalString;
+		}
+
+		template<class CharType, typename T, typename ...Ts>
+		USE_RESULT constexpr std::basic_string<CharType> ToString(const std::basic_string<CharType>& format, const T& arg, const Ts& ...argPack)
+		{
+			const std::basic_string_view<CharType> fmt(format);
+			const std::basic_string<CharType> text = ToString(fmt, arg, argPack...);
+			return text;
 		}
 
 		template<class CharType, typename T, typename ...Ts>
@@ -281,15 +292,26 @@ namespace klib {
 			return text;
 		}
 
-		template<class CharType, typename T>
-		constexpr std::basic_string<CharType> ToString(T&& object)
+		template<class CharType, typename T, typename ...Ts>
+		constexpr std::basic_string<CharType> ToString(const T& arg, const  Ts& ...argPack)
 		{
-			const auto s = ToString("{0}", object);
-			return s;
+			using DataTypes = std::variant<std::monostate, T, Ts...>;
+			constexpr auto count = std::variant_size_v<DataTypes> - 1;
+			std::basic_string<CharType> format;
+
+			for (auto i = 0; i < count; ++i)
+			{
+				format.push_back(CharType('{'));
+				format.append(stringify::StringIntegral<CharType>(i, 1));
+				format.push_back(CharType('}'));
+			}
+
+			const auto output = ToString(format, arg, argPack...);
+			return output;
 		}
 	}
 
 #ifdef KLIB_SHORT_NAMESPACE
-	using namespace kFormat;
+	using namespace kString;
 #endif
 }

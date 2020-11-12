@@ -1,7 +1,7 @@
-﻿#pragma once
+#pragma once
 
-#include "Macros.hpp"
-#include "StringTypeTraits.hpp"
+#include "../../HelperMacros.hpp"
+#include "../../Type Traits/StringTraits.hpp"
 #include <string>
 
 namespace klib::kString
@@ -10,11 +10,11 @@ namespace klib::kString
 		type_trait::Is_CharType_V<DestChar>
 		&& type_trait::Is_CharType_V<SourceChar>
 		>>
-	USE_RESULT constexpr DestChar Convert(const SourceChar source) noexcept
+		USE_RESULT constexpr DestChar Convert(const SourceChar source) noexcept
 	{
 		return CAST(DestChar, source);
 	}
-
+	
 	template<typename DestChar, typename SourceChar, class = std::enable_if_t<
 		type_trait::Is_CharType_V<DestChar>
 		&& type_trait::Is_CharType_V<SourceChar>

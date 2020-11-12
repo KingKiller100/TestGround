@@ -1,15 +1,11 @@
 #pragma once
 
 #include "kStringTypes.hpp"
-
-#include "Macros.hpp"
-#include "StringTypeTraits.hpp"
+#include "../../Type Traits/StringTraits.hpp"
 
 #include <algorithm>
-#include <vcruntime_typeinfo.h>
-#include <cmath>
-#include <regex>
 #include <vector>
+#include <regex>
 
 namespace klib::kString
 {
@@ -43,7 +39,8 @@ namespace klib::kString
 	}
 
 	template<class Char = char>
-	USE_RESULT constexpr std::vector<StringWriter<Char>> Split(const StringWriter<Char>& str, const Char* tokens, const PreserveToken preserveToken = PreserveToken::NO, const PreserveEmpty preserveEmpty = PreserveEmpty::NO)
+	USE_RESULT constexpr std::vector<StringWriter<Char>> Split(const StringWriter<Char>& str, const Char* tokens,
+		const PreserveToken preserveToken = PreserveToken::NO, const PreserveEmpty preserveEmpty = PreserveEmpty::NO)
 	{
 		using StrW = StringWriter<Char>;
 
@@ -67,59 +64,78 @@ namespace klib::kString
 	}
 
 	template<class Char = char>
-	USE_RESULT constexpr std::vector<StringWriter<Char>> Split(const StringWriter<Char>& str, const StringReader<Char>& tokens, const PreserveToken preserveToken = PreserveToken::NO, const PreserveEmpty preserveEmpty = PreserveEmpty::NO)
+	USE_RESULT constexpr std::vector<StringWriter<Char>> Split(const StringWriter<Char>& str, const StringReader<Char>& tokens,
+		const PreserveToken preserveToken = PreserveToken::NO, const PreserveEmpty preserveEmpty = PreserveEmpty::NO)
 	{
 		return Split(str, tokens.data(), preserveToken, preserveEmpty);
 	}
 
-	template<class Char = char>
-	USE_RESULT constexpr Char* ToUpper(const Char* input)
+	template<class CharT, class =
+		std::enable_if_t<
+		type_trait::Is_CharType_V<CharT>
+		>>
+		USE_RESULT constexpr CharT ToUpper(CharT c)
 	{
-		using StrR = StringReader<Char>;
-		StrR in(input);
-		Char* output = new Char[in.length() + 1]{};
+		if (c >= CharT('a') && c <= CharT('z'))
+			c -= 32;
+		return c;
+	}
 
-		for (auto i = 0; i < in.length(); ++i)
-		{
-			Char c = in[i];
-			if (c >= Char('a') && c <= Char('z'))
-				output[i] = CAST(Char, c - 32);
-			else
-				output[i] = c;
-		}
-
+	template<class Stringish
+		, class = std::enable_if_t<
+		type_trait::Is_StringType_V<Stringish>
+		|| (type_trait::Is_CharType_V<ONLY_TYPE(Stringish)>
+			&& std::is_pointer_v<Stringish>)
+		>>
+		USE_RESULT constexpr auto ToUpper(const Stringish& input)
+	{
+		auto output = ToWriter( input );
+		for (auto& c : output)
+			c = ToUpper(c);
 		return output;
 	}
 
-	template<class Char = char>
-	USE_RESULT constexpr Char* ToLower(const Char* input)
+	template<class CharT, size_t Size, typename = std::enable_if_t<
+		type_trait::Is_CharType_V<CharT>
+		&& std::is_array_v<CharT[Size]>
+		>>
+	USE_RESULT constexpr auto ToUpper(const CharT (&input)[Size])
 	{
-		using StrR = StringReader<Char>;
-		StrR in(input);
-		Char* output = new Char[in.length() + 1]{};
+		return ToUpper(StringReader<std::remove_all_extents_t<CharT>>(input));
+	}
 
-		for (auto i = 0; i < in.length(); ++i)
-		{
-			Char c = in[i];
-			if (c >= Char('A') && c <= Char('Z'))
-				output[i] = CAST(Char, c + 32);
-			else
-				output[i] = c;
-		}
+	template<class CharT, class =
+		std::enable_if_t<
+		type_trait::Is_CharType_V<CharT>
+		>>
+		USE_RESULT constexpr CharT ToLower(CharT c)
+	{
+		if (c >= CharT('A') && c <= CharT('Z'))
+			c += 32;
+		return c;
+	}
 
+	template<class Stringish
+		, class = std::enable_if_t<
+		type_trait::Is_StringType_V<Stringish>
+		|| (type_trait::Is_CharType_V<ONLY_TYPE(Stringish)>
+			&& std::is_pointer_v<Stringish>)
+		>>
+		USE_RESULT constexpr auto ToLower(const Stringish& input)
+	{
+		auto output = ToWriter(input);
+		for (auto& c : output)
+			c = ToLower(c);
 		return output;
 	}
 
-	template<class T, class = std::enable_if_t<type_trait::Is_StringType_V< T >>>
-	USE_RESULT constexpr StringWriter<typename T::value_type > ToUpper(const T& input)
+	template<class CharT, size_t Size, typename = std::enable_if_t<
+		type_trait::Is_CharType_V<CharT>
+		&& std::is_array_v<CharT[Size]>
+		>>
+		USE_RESULT constexpr auto ToLower(const CharT(&input)[Size])
 	{
-		return ToUpper(input.data());
-	}
-
-	template<class T, class = std::enable_if_t<type_trait::Is_StringType_V< T >>>
-	USE_RESULT constexpr StringWriter<typename T::value_type > ToLower(const T& input)
-	{
-		return ToLower<typename T::value_type>(input.data());
+		return ToLower(StringReader<std::remove_all_extents_t<CharT>>(input));
 	}
 
 	template<typename StringType, typename = std::enable_if_t<type_trait::Is_StringType_V<StringType>>>
@@ -169,36 +185,38 @@ namespace klib::kString
 		return count;
 	}
 
-	template<class Integer, typename StringType
+	template<class Integer_t, typename StringType
 		, typename = std::enable_if_t<
 		type_trait::Is_StringType_V<StringType>
-		&& std::is_integral_v<Integer>
 		>>
-		constexpr Integer StrTo(StringType string)
+		constexpr Integer_t StrTo(StringType string)
 	{
+		static_assert(std::is_integral_v<Integer_t>, "Can only be used with integer types "
+			"(char, int, long, unsigned short, etc..");
+
 		using CharType = typename StringType::value_type;
 
 		const auto CrashFunc = [](const std::string& errMsg) { throw std::runtime_error(errMsg); };
 
 		std::regex r("\\s+");
 		string = std::regex_replace(string, r, "");
-		
+
 		if (string.empty())
 			CrashFunc("Cannot convert empty string to integer number");
-		if (kString::Contains(string, CharType('.')))
+		if (Contains(string, CharType('.')))
 			CrashFunc("string must contain only one integer number");
 
-		const auto isNeg = std::is_signed_v<Integer>
+		const auto isNeg = std::is_signed_v<Integer_t>
 			&& string[0] == CharType('-');
 
 		if (isNeg)
 			string.erase(string.begin(), string.begin() + 1);
-		
-		Integer result = 0;
+
+		Integer_t result = 0;
 		size_t size = string.size();
 		auto magnitude = static_cast<size_t>(std::pow(10, size - 1));
 
-		if (size > std::numeric_limits<Integer>::digits10)
+		if (size > std::numeric_limits<Integer_t>::digits10)
 		{
 			const std::string type = typeid(result).name();
 			const auto msg = "String contains more digits than largest number of type: "
@@ -215,7 +233,7 @@ namespace klib::kString
 			const auto digit = static_cast<size_t>(digitChr - CharType('0'));
 			const auto asInt = digit * magnitude;
 
-			result += static_cast<Integer>(asInt);
+			result += static_cast<Integer_t>(asInt);
 			magnitude /= 10;
 		}
 

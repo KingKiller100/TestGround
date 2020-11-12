@@ -1,9 +1,6 @@
 ﻿#pragma once
 
-#include "../kStringManipulation.hpp"
-
-
-namespace klib::kFormat::stringify
+namespace klib::kString::stringify
 {
 	constexpr auto nPrecision = static_cast<size_t>(-1);
 
