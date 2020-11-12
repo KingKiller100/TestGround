@@ -1,14 +1,14 @@
-#include <Utility/String/kToString.hpp>
+#include "TestManagerWrapper.hpp"
 
 #include <iostream>
 
-using namespace klib;
 
 int main()
 {
-	const auto str = ToString<char>(1, 2, 3, 4, 5);
-
-	std::cout << str << std::endl;
+	test::TestManagerWrapper::Init();
+	test::TestManagerWrapper::RunAll();
+	test::TestManagerWrapper::ClearAll();
+	
 	std::cin.get();
 	
 	return 0;
