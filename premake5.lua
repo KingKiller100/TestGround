@@ -36,7 +36,6 @@ project "TestGround"
     files
     {
         "%{IncludeDir.KLIB}",
-
         "TestGround/Source Code/**.hpp",
         "TestGround/Source Code/**.cpp",
         -- "cpp.hint"
@@ -44,6 +43,7 @@ project "TestGround"
 
     includedirs
     {
+        "%{IncludeDir.KLIB}",
         "TestGround/Source Code/",
     }
 
