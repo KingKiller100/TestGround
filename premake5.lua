@@ -35,7 +35,6 @@ project "TestGround"
 
     files
     {
-        "%{IncludeDir.KLIB}",
         "TestGround/Source Code/**.hpp",
         "TestGround/Source Code/**.cpp",
         -- "cpp.hint"
@@ -65,11 +64,23 @@ project "TestGround"
     }
 
     filter "configurations:Debug"
-        defines "KLIB_DEBUG"
+        defines
+        {
+            "KLIB_TEST",
+        }
         symbols "On"
         runtime "Debug"
 
-    -- filter "configurations:Release"
-    --     defines "KLIB_RELEASE"
-    --     optimize "Full"
-    --     runtime "Release"
+    filter "configurations:Release"
+        defines
+        { 
+            "KLIB_RELEASE",
+            "KLIB_TEST",
+        }
+        optimize "Full"
+        runtime "Release"
+
+    filter "configurations:Profile"
+        defines "KLIB_PROFILE"
+        optimize "Speed"
+        runtime "Release"
