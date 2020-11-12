@@ -1,6 +1,6 @@
-workspace "Stringify"
+workspace "TestGround"
     architecture "x86_64"
-    startproject "ToString"
+    startproject "TestGround"
 
     configurations
     {
@@ -15,8 +15,15 @@ workspace "Stringify"
 
     OutputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}\\"
 
-project "ToString"
-    location "ToString/"
+IncludeDir = {}
+IncludeDir["KLIB"] = "kLibrary/Source Files/"
+
+group "Subjects"
+    include "kLibrary/"
+group ""
+    
+project "TestGround"
+    location "TestGround/"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++latest"
@@ -26,19 +33,18 @@ project "ToString"
     targetdir ("bin/" .. OutputDir .. "/%{prj.name}")
     objdir ("bin-int/" .. OutputDir .. "/%{prj.name}")
 
-    -- pchheader "Precompile.hpp"
-    -- pchsource "Krakoa/Source Files/Precompile.cpp"
-
     files
     {
-        "ToString/Source Code/**.hpp",
-        "ToString/Source Code/**.cpp",
+        "%{IncludeDir.KLIB}",
+
+        "TestGround/Source Code/**.hpp",
+        "TestGround/Source Code/**.cpp",
         -- "cpp.hint"
     }
 
     includedirs
     {
-        "ToString/Source Code/",
+        "TestGround/Source Code/",
     }
 
     defines
