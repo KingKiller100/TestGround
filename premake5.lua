@@ -16,7 +16,8 @@ workspace "TestGround"
     OutputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}\\"
 
 IncludeDir = {}
-IncludeDir["KLIB"] = "../kLibrary/Source Files/"
+IncludeDir["KLIB_CORE"] = "../kLibrary/Source Files/"
+IncludeDir["KLIB_TEST"] = "../kLibrary/Tests/",
 
 group "Subjects"
     include "../kLibrary/"
@@ -42,7 +43,8 @@ project "TestGround"
 
     includedirs
     {
-        "%{IncludeDir.KLIB}",
+        "%{IncludeDir.KLIB_CORE}",
+        "%{IncludeDir.KLIB_TEST}",
         "TestGround/Source Code/",
     }
 
@@ -50,7 +52,12 @@ project "TestGround"
 	{
         "KLIB_SHORT_NAMESPACE",
         "_CRT_SECURE_NO_WARNINGS"
-	}
+    }
+    
+    links
+    {
+        "kLibrary",
+    }
 
     filter "system:Windows"
         systemversion "latest"
