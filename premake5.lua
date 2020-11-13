@@ -4,7 +4,7 @@ workspace "TestGround"
 
     configurations
     {
-        "Debug",
+        "Test",
         "Release"
     }
 
@@ -16,10 +16,10 @@ workspace "TestGround"
     OutputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}\\"
 
 IncludeDir = {}
-IncludeDir["KLIB"] = "kLibrary/Source Files/"
+IncludeDir["KLIB"] = "../kLibrary/Source Files/"
 
 group "Subjects"
-    include "kLibrary/"
+    include "../kLibrary/"
 group ""
     
 project "TestGround"
@@ -53,17 +53,17 @@ project "TestGround"
 	}
 
     filter "system:Windows"
-    systemversion "latest"
+        systemversion "latest"
 
-    defines
-    {
-        "_CRT_SECURE_NO_WARNINGS",
-        "KLIB_LIB",
-        "KLIB_WINDOWS_OS",
-        "MSVC_PLATFORM_TOOLSET=$(PlatformToolsetVersion)"
-    }
+        defines
+        {
+            "_CRT_SECURE_NO_WARNINGS",
+            "KLIB_LIB",
+            "KLIB_WINDOWS_OS",
+            "MSVC_PLATFORM_TOOLSET=$(PlatformToolsetVersion)"
+        }
 
-    filter "configurations:Debug"
+    filter "configurations:Test"
         defines
         {
             "KLIB_TEST",

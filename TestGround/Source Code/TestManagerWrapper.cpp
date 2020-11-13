@@ -8,22 +8,21 @@ namespace test
 	
 	void TestManagerWrapper::Init()
 	{
-		//kTest::TesterManager::Get().Initialize();
-		testMan.InitializeUtilityTests();
+		//testMan.InitializeUtilityTests();
 	}
 
 	void TestManagerWrapper::ShutDown()
 	{
-		testMan.Shutdown();
+		//testMan.Shutdown();
 	}
 
 	void TestManagerWrapper::RunAll()
 	{
-		testMan.RunAll();
+		// testMan.RunAll();
 	}
 
 	void TestManagerWrapper::ClearAll()
 	{
-		testMan.ClearAllTests();
+		// testMan.ClearAllTests();
 	}
 }
