@@ -6,8 +6,11 @@ int main()
 {
 	auto& testMan = kTest::TesterManager::Get();
 	testMan.Initialize();
-	testMan.InitializeUtilityTests();
-	testMan.RunAll();
+	// testMan.InitializeMaths();
+	// testMan.InitializeUtility();
+	// testMan.InitializeTemplates();
+	// testMan.RunAll();
+	testMan.RunPerformanceTests();
 	testMan.Shutdown();
 
 	std::cin.get();
