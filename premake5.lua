@@ -31,8 +31,8 @@ project "TestGround"
     characterset ("default")
 	staticruntime "on"
 
-    targetdir ("bin/" .. OutputDir .. "/%{prj.name}")
-    objdir ("bin-int/" .. OutputDir .. "/%{prj.name}")
+    targetdir ("bin/" .. OutputDir .. "/")
+    objdir ("bin-int/" .. OutputDir .. "/")
 
     files
     {
