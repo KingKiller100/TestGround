@@ -1,0 +1,30 @@
+klib::kString::ToString: 
+	klib::kString::ToString is the fastest on average by 0.000%
+	Fastest Instance: klib::kString::ToString Time: 154ms (milliseconds)
+	Slowest Instance: klib::kString::ToString Time: 1035ms (milliseconds)
+
+klib::kString::ToString double vs klib::kString::SprintfWrapper: 
+	klib::kString::SprintfWrapper is the fastest on average by 172.483%
+	Fastest Instance: klib::kString::SprintfWrapper Time: 6ms (milliseconds)
+	Slowest Instance: klib::kString::ToString double Time: 265ms (milliseconds)
+
+klib::kString::ToString double vs std::stringstream double vs std::sprintf double vs klib::kString::SprintfWrapper: 
+	std::sprintf double is the fastest on average by 426.817%
+	Fastest Instance: std::stringstream double Time: 1ms (milliseconds)
+	Slowest Instance: std::stringstream double Time: 641ms (milliseconds)
+
+klib::kString::ToString int vs std::stringstream int vs std::sprintf int: 
+	std::sprintf int is the fastest on average by 529.703%
+	Fastest Instance: std::sprintf int Time: 2ms (milliseconds)
+	Slowest Instance: std::stringstream int Time: 585ms (milliseconds)
+
+klib::kString::ToString vs std::sprintf vs klib::kString::stringify::kSprintfWrapper: 
+	std::sprintf is the fastest on average by 733.728%
+	Fastest Instance: std::sprintf Time: 17ms (milliseconds)
+	Slowest Instance: klib::kString::ToString Time: 1035ms (milliseconds)
+
+klib::kString::ToString vs std::stringstream: 
+	std::stringstream is the fastest on average by 107.587%
+	Fastest Instance: std::stringstream Time: 87ms (milliseconds)
+	Slowest Instance: klib::kString::ToString Time: 1035ms (milliseconds)
+
