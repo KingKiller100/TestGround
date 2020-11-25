@@ -1,0 +1,40 @@
+C sprintf vs std::stringstream: 
+	C sprintf is the fastest on average by 225.044%
+	Fastest Instance: std::stringstream Time: 17ms (milliseconds)
+	Slowest Instance: std::stringstream Time: 504ms (milliseconds)
+
+klib::kString::ToString: 
+	klib::kString::ToString is the fastest on average by 0.000%
+	Fastest Instance: klib::kString::ToString Time: 97ms (milliseconds)
+	Slowest Instance: klib::kString::ToString Time: 484ms (milliseconds)
+
+klib::kString::ToString double vs klib::kString::SprintfWrapper: 
+	klib::kString::SprintfWrapper is the fastest on average by 76.149%
+	Fastest Instance: klib::kString::SprintfWrapper Time: 9ms (milliseconds)
+	Slowest Instance: klib::kString::ToString double Time: 77ms (milliseconds)
+
+klib::kString::ToString double vs std::stringstream double vs C sprintf double vs klib::kString::SprintfWrapper: 
+	C sprintf double is the fastest on average by 200.651%
+	Fastest Instance: C sprintf double Time: 5ms (milliseconds)
+	Slowest Instance: klib::kString::ToString double Time: 77ms (milliseconds)
+
+klib::kString::ToString int vs std::stringstream int vs C sprintf int: 
+	C sprintf int is the fastest on average by 306.583%
+	Fastest Instance: C sprintf int Time: 2ms (milliseconds)
+	Slowest Instance: klib::kString::ToString int Time: 132ms (milliseconds)
+
+klib::kString::ToString string vs std::stringstream string vs sprintf string vs klib::kString::SprintfWrapper string: 
+	std::stringstream string is the fastest on average by 644.820%
+	Fastest Instance: std::stringstream string Time: 1ms (milliseconds)
+	Slowest Instance: klib::kString::SprintfWrapper string Time: 43ms (milliseconds)
+
+klib::kString::ToString vs C sprintf vs klib::kString::stringify::kSprintfWrapper: 
+	C sprintf is the fastest on average by 478.062%
+	Fastest Instance: C sprintf Time: 18ms (milliseconds)
+	Slowest Instance: klib::kString::stringify::kSprintfWrapper Time: 707ms (milliseconds)
+
+klib::kString::ToString vs std::stringstream: 
+	std::stringstream is the fastest on average by 77.841%
+	Fastest Instance: std::stringstream Time: 17ms (milliseconds)
+	Slowest Instance: std::stringstream Time: 504ms (milliseconds)
+
