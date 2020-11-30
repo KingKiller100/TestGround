@@ -1,0 +1,40 @@
+C sprintf vs std::stringstream: 
+	C sprintf is the fastest on average by 207.459%
+	Fastest Instance: std::stringstream Time: 34ms (milliseconds)
+	Slowest Instance: std::stringstream Time: 14633ms (milliseconds)
+
+klib::kString::ToString: 
+	klib::kString::ToString is the fastest on average by 0.000%
+	Fastest Instance: klib::kString::ToString Time: 144ms (milliseconds)
+	Slowest Instance: klib::kString::ToString Time: 16467ms (milliseconds)
+
+klib::kString::ToString double vs klib::kString::SprintfWrapper: 
+	klib::kString::SprintfWrapper is the fastest on average by 4.715%
+	Fastest Instance: klib::kString::SprintfWrapper Time: 15ms (milliseconds)
+	Slowest Instance: klib::kString::SprintfWrapper Time: 7146ms (milliseconds)
+
+klib::kString::ToString double vs std::stringstream double vs C sprintf double vs klib::kString::SprintfWrapper: 
+	C sprintf double is the fastest on average by 85.830%
+	Fastest Instance: C sprintf double Time: 10ms (milliseconds)
+	Slowest Instance: C sprintf double Time: 10019ms (milliseconds)
+
+klib::kString::ToString int vs std::stringstream int vs C sprintf int: 
+	C sprintf int is the fastest on average by 246.308%
+	Fastest Instance: C sprintf int Time: 4ms (milliseconds)
+	Slowest Instance: klib::kString::ToString int Time: 853ms (milliseconds)
+
+klib::kString::ToString string vs std::stringstream string vs sprintf string vs klib::kString::SprintfWrapper string: 
+	sprintf string is the fastest on average by 319.035%
+	Fastest Instance: std::stringstream string Time: 2ms (milliseconds)
+	Slowest Instance: klib::kString::SprintfWrapper string Time: 7044ms (milliseconds)
+
+klib::kString::ToString vs C sprintf vs klib::kString::stringify::kSprintfWrapper: 
+	C sprintf is the fastest on average by 418.069%
+	Fastest Instance: C sprintf Time: 34ms (milliseconds)
+	Slowest Instance: klib::kString::ToString Time: 16467ms (milliseconds)
+
+klib::kString::ToString vs std::stringstream: 
+	std::stringstream is the fastest on average by 68.500%
+	Fastest Instance: std::stringstream Time: 34ms (milliseconds)
+	Slowest Instance: klib::kString::ToString Time: 16467ms (milliseconds)
+
