@@ -10,9 +10,9 @@ int main()
 	
 	auto& testMan = kTest::TesterManager::Get();
 	testMan.Initialize();
-	// testMan.InitializeMaths();
+	 testMan.InitializeMaths();
 	testMan.InitializeUtility();
-	// testMan.InitializeTemplates();
+	 testMan.InitializeTemplates();
 	testMan.RunAll();
 	testMan.RunPerformanceTests();
 	testMan.Shutdown();
