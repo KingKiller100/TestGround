@@ -1,12 +1,11 @@
 #include "Testing/TesterManager.hpp"
-#include <Utility/String/Tricks/kStringLocale.hpp>
-
+#include <Utility/Locale/kLocale.hpp>
 
 #include <iostream>
 
 int main()
 {
-	klib::kString::secret::impl::SetLocale("");
+	klib::kLocale::SetLocale("");
 	
 	auto& testMan = kTest::TesterManager::Get();
 	testMan.Initialize();
