@@ -1,5 +1,5 @@
 #include "Testing/TesterManager.hpp"
-#include <Utility/Locale/kLocale.hpp>
+#include <Utility/Localization/kLocale.hpp>
 
 #include <iostream>
 
