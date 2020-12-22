@@ -11,7 +11,9 @@ int main()
 	testMan.InitializeMaths();
 	testMan.InitializeUtility();
 	testMan.InitializeTemplates();
-	testMan.RunAll();
+	testMan.RunAll(0);
+	// testMan.RunAll(8);
+	//testMan.RunAll(std::thread::hardware_concurrency());
 	testMan.RunPerformanceTests();
 	testMan.Shutdown();
 
