@@ -1,10 +1,12 @@
 #include "Testing/TesterManager.hpp"
 #include <Utility/Localization/kLocale.hpp>
+#include <Utility/Calendar/kUseCalendarSourceInfo.hpp>
 #include <iostream>
 
 int main()
 {
 	klib::kLocale::SetLocale("");
+	klib::kCalendar::UsePlatformCalendarInfoSource();
 
 	auto& testMan = kTest::TesterManager::Get();
 	testMan.Initialize();
