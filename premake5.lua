@@ -16,7 +16,7 @@ workspace "TestGround"
     OutputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}\\"
 
 IncludeDir = {}
-IncludeDir["KLIB_CORE"] = "../kLibrary/Source Files/"
+IncludeDir["KLIB_CORE"] = "../kLibrary/Source/"
 IncludeDir["KLIB_TEST"] = "../kLibrary/Tests/",
 
 group "Subjects"
@@ -36,8 +36,8 @@ project "TestGround"
 
     files
     {
-        "TestGround/Source Code/**.hpp",
-        "TestGround/Source Code/**.cpp",
+        "TestGround/Src/**.hpp",
+        "TestGround/Src/**.cpp",
         -- "cpp.hint"
     }
 

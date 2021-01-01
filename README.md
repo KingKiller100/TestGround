@@ -1,2 +1,2 @@
-# Stringify
-Custom type safe and templated string interpolator function
+# Test Ground
+Place to try out all library projects functionality
