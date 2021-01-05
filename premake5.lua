@@ -51,7 +51,7 @@ project "TestGround"
     defines
 	{
         "KLIB_SHORT_NAMESPACE",
-        -- "KLOG_OPT_DBG_STR",
+        "KLOG_OPT_DBG_STR",
         "_CRT_SECURE_NO_WARNINGS"
     }
     
