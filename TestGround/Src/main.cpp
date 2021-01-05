@@ -11,7 +11,7 @@ int main()
 	auto& testMan = kTest::TesterManager::Get();
 	testMan.Initialize();
 	testMan.InitializeMaths();
-	testMan.InitializeUtility();
+	testMan.InitializeUtility(false);
 	testMan.InitializeTemplates();
 	testMan.RunAll(std::thread::hardware_concurrency());
 	testMan.RunPerformanceTests();
