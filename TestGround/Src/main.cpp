@@ -1,6 +1,5 @@
 #include "Testing/TesterManager.hpp"
-#include <Utility/Localization/kLocale.hpp>
-#include <Utility/Calendar/kUseCalendarSourceInfo.hpp>
+#include <kLib.hpp>
 #include <iostream>
 
 int main()
