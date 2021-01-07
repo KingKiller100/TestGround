@@ -1,4 +1,3 @@
-#include "Testing/TesterManager.hpp"
 #include <kLib.hpp>
 #include <iostream>
 
