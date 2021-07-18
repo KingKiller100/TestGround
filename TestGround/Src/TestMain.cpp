@@ -15,7 +15,10 @@ int main()
 	testMan.RunPerformanceTests();
 	testMan.Shutdown();
 
+	std::cout << "\nPress 'ENTER' to exit...";
+	std::cout.flush();
+	std::cerr.flush();
 	std::cin.get();
 
-	return 0;
+	return EXIT_SUCCESS;
 }
