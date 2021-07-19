@@ -6,14 +6,17 @@ int main()
 	klib::kLocale::SetLocale("");
 	klib::kCalendar::UsePlatformCalendarInfoSource();
 
-	auto& testMan = kTest::TesterManager::Get();
-	testMan.Initialize();
-	testMan.InitializeMaths();
-	testMan.InitializeUtility(false);
-	testMan.InitializeTemplates();
-	testMan.RunAll(std::thread::hardware_concurrency());
-	testMan.RunPerformanceTests();
-	testMan.Shutdown();
+	auto* testMan = new kTest::TesterManager{};
+	testMan->Initialize(true);
+	kTest::InitializeMathsTests(testMan);
+	kTest::InitializeUtilityTests(testMan, false);
+	kTest::InitializeTemplateTests(testMan);
+	testMan->RunAll(std::thread::hardware_concurrency());
+	testMan->RunPerformanceTests();
+	testMan->Shutdown();
+
+	delete testMan;
+	testMan = nullptr;
 
 	std::cout << "\nPress 'ENTER' to exit...";
 	std::cout.flush();
