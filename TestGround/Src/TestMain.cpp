@@ -3,20 +3,17 @@
 
 int main()
 {
-	klib::kLocale::SetLocale("");
+	klib::kLocale::SetDefaultLocale();
 	klib::kCalendar::UsePlatformCalendarInfoSource();
 
-	auto* testMan = new kTest::TesterManager{};
-	testMan->Initialize(true);
+	auto testMan = kTest::TesterManager{};
+	testMan.Initialize(true);
 	kTest::InitializeMathsTests(testMan);
 	kTest::InitializeUtilityTests(testMan, false);
 	kTest::InitializeTemplateTests(testMan);
-	testMan->RunAll(std::thread::hardware_concurrency());
-	testMan->RunPerformanceTests();
-	testMan->Shutdown();
-
-	delete testMan;
-	testMan = nullptr;
+	testMan.RunAll(std::thread::hardware_concurrency());
+	testMan.RunPerformanceTests();
+	testMan.Shutdown();
 
 	std::cout << "\nPress 'ENTER' to exit...";
 	std::cout.flush();
