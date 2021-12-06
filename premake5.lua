@@ -21,6 +21,7 @@ IncludeDir["KLIB_TEST"] = "../kLibrary/Tests/",
 
 group "Subjects"
     include "../kLibrary/"
+    include "../kLibrary/Tests/"
 group ""
     
 project "TestGround"
@@ -38,14 +39,11 @@ project "TestGround"
     {
         "TestGround/Src/**.hpp",
         "TestGround/Src/**.cpp",
-        -- "cpp.hint"
     }
 
     includedirs
     {
-        "%{IncludeDir.KLIB_CORE}",
         "%{IncludeDir.KLIB_TEST}",
-        "TestGround/Source Code/",
     }
 
     defines
@@ -76,19 +74,10 @@ project "TestGround"
         {
             "KLIB_TEST",
         }
+        includedirs
+        {
+            "%{IncludeDir.KLIB_CORE}",
+            "TestGround/Source Code/",
+        }
         symbols "On"
         runtime "Debug"
-
-    filter "configurations:Release"
-        defines
-        { 
-            "KLIB_RELEASE",
-            "KLIB_TEST",
-        }
-        optimize "Full"
-        runtime "Release"
-
-    filter "configurations:Profile"
-        defines "KLIB_PROFILE"
-        optimize "Speed"
-        runtime "Release"
