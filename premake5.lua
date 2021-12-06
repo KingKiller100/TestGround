@@ -4,8 +4,7 @@ workspace "TestGround"
 
     configurations
     {
-        "Test",
-        "Release"
+        "Test"
     }
 
     flags
@@ -31,7 +30,9 @@ project "TestGround"
     cppdialect "C++latest"
     characterset ("default")
 	staticruntime "on"
-
+    symbols "On"
+    runtime "Debug"
+    
     targetdir ("bin/" .. OutputDir .. "/")
     objdir ("bin-int/" .. OutputDir .. "/")
 
@@ -44,18 +45,22 @@ project "TestGround"
     includedirs
     {
         "%{IncludeDir.KLIB_TEST}",
+        "%{IncludeDir.KLIB_CORE}",
+        "TestGround/Source Code/",
     }
 
     defines
 	{
+        "KLIB_TEST",
         "KLIB_SHORT_NAMESPACE",
         "KLOG_OPT_DBG_STR",
         "_CRT_SECURE_NO_WARNINGS"
     }
-    
+
     links
     {
-        "kLibrary",
+        -- "kLibrary",
+        "kTest",
     }
 
     filter "system:Windows"
@@ -69,15 +74,3 @@ project "TestGround"
             "MSVC_PLATFORM_TOOLSET=$(PlatformToolsetVersion)"
         }
 
-    filter "configurations:Test"
-        defines
-        {
-            "KLIB_TEST",
-        }
-        includedirs
-        {
-            "%{IncludeDir.KLIB_CORE}",
-            "TestGround/Source Code/",
-        }
-        symbols "On"
-        runtime "Debug"
