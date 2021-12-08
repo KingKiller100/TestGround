@@ -34,8 +34,6 @@ project "TestGround"
     cppdialect "C++latest"
     characterset ("default")
 	staticruntime "on"
-    symbols "On"
-    runtime "Debug"
     
     targetdir (BinDir)
     objdir (ObjDir)
@@ -49,7 +47,6 @@ project "TestGround"
     includedirs
     {
         "%{IncludeDir.KLIB_TEST}",
-        "%{IncludeDir.KLIB_CORE}",
         "TestGround/Source Code/",
     }
 
@@ -62,7 +59,7 @@ project "TestGround"
         "_CRT_SECURE_NO_WARNINGS"
     }
 
-    links {"kTests", "kLibrary"}
+    links {"kTests"}
 
     filter "system:Windows"
         systemversion "latest"
