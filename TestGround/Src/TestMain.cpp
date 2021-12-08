@@ -17,6 +17,7 @@ int main()
 	{
 		std::cerr << "Exception occurred:\n";
 		std::cerr << debug::UnwrapNestedExceptions();
+		return EXIT_FAILURE;
 	}
 
 	std::cout << "\nPress 'ENTER' to exit...";
@@ -29,8 +30,8 @@ int main()
 
 void kLibTest()
 {
-		klib::kLocale::SetDefaultLocale();
-		klib::kCalendar::UsePlatformCalendarInfoSource();
+	klib::kLocale::SetDefaultLocale();
+	klib::kCalendar::UsePlatformCalendarInfoSource();
 	kTest::TesterManager testMan;
 	testMan.Initialize( true );
 	kTest::InitializeMathsTests( testMan );
