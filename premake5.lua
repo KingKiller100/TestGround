@@ -4,7 +4,8 @@ workspace "TestGround"
 
     configurations
     {
-        "Test"
+        "Debug",
+        "Release"
     }
 
     flags
@@ -12,17 +13,20 @@ workspace "TestGround"
         "MultiProcessorCompile"
     }
 
-    OutputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}\\"
+    OutputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}/"
+    BinDir = "%{wks.location}/bin/" .. OutputDir
+    ObjDir = "%{wks.location}/bin-int/" .. OutputDir
 
 IncludeDir = {}
 IncludeDir["KLIB_CORE"] = "../kLibrary/Source/"
-IncludeDir["KLIB_TEST"] = "../kLibrary/Tests/",
+IncludeDir["KLIB_TEST"] = "../kLibrary/Tests/"
 
 group "Subjects"
     include "../kLibrary/"
     include "../kLibrary/Tests/"
 group ""
     
+
 project "TestGround"
     location "TestGround/"
     kind "ConsoleApp"
@@ -33,8 +37,8 @@ project "TestGround"
     symbols "On"
     runtime "Debug"
     
-    targetdir ("bin/" .. OutputDir .. "/")
-    objdir ("bin-int/" .. OutputDir .. "/")
+    targetdir (BinDir)
+    objdir (ObjDir)
 
     files
     {
@@ -51,17 +55,14 @@ project "TestGround"
 
     defines
 	{
+        "KLIB_LIB",
         "KLIB_TEST",
         "KLIB_SHORT_NAMESPACE",
         "KLOG_OPT_DBG_STR",
         "_CRT_SECURE_NO_WARNINGS"
     }
 
-    links
-    {
-        -- "kLibrary",
-        "kTest",
-    }
+    links {"kTests", "kLibrary"}
 
     filter "system:Windows"
         systemversion "latest"
@@ -73,4 +74,16 @@ project "TestGround"
             "KLIB_WINDOWS_OS",
             "MSVC_PLATFORM_TOOLSET=$(PlatformToolsetVersion)"
         }
+        
+    filter "configurations:Debug"
+        defines "KLIB_DEBUG"
+        symbols "On"
+        runtime "Debug"
+
+    filter "configurations:Release"
+        defines "KLIB_RELEASE"
+        optimize "Full"
+        runtime "Release"
+        
+
 
