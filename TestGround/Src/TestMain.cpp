@@ -37,7 +37,7 @@ void kLibTest()
 	kTest::InitializeMathsTests( testMan );
 	kTest::InitializeUtilityTests( testMan, false );
 	kTest::InitializeTemplateTests( testMan );
-	testMan.RunAll( std::thread::hardware_concurrency() );
+	testMan.RunAll( true );
 	testMan.RunPerformanceTests();
 	testMan.Shutdown();
 }
