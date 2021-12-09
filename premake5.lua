@@ -14,8 +14,8 @@ workspace "TestGround"
     }
 
     OutputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}/"
-    BinDir = "%{wks.location}/bin/" .. OutputDir
-    ObjDir = "%{wks.location}/bin-int/" .. OutputDir
+    BinDir = "bin/" .. OutputDir
+    ObjDir = "bin-int/" .. OutputDir
 
 IncludeDir = {}
 IncludeDir["KLIB_CORE"] = "../kLibrary/Source/"
