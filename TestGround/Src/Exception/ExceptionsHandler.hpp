@@ -5,5 +5,5 @@
 
 namespace debug
 {
-	std::string UnwrapNestedExceptions( std::exception_ptr ePtr = std::current_exception() );
+	std::string ReportNestedExceptions( std::exception_ptr ePtr = std::current_exception() );
 }

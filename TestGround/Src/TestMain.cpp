@@ -12,18 +12,18 @@ int main()
 	try
 	{
 		kLibTest();
+		std::cout << "\nPress 'ENTER' to exit...";
+		std::cin.get();
+
+		FlushOutputs();
 	}
 	catch ( ... )
 	{
 		std::cerr << "Exception occurred:\n";
-		std::cerr << debug::UnwrapNestedExceptions();
+		std::cerr << debug::ReportNestedExceptions();
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "\nPress 'ENTER' to exit...";
-	std::cin.get();
-
-	FlushOutputs();
 
 	return EXIT_SUCCESS;
 }

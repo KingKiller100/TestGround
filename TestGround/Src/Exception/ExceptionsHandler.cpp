@@ -63,7 +63,7 @@ namespace debug
 		}
 	}
 
-	std::string UnwrapNestedExceptions( std::exception_ptr ePtr )
+	std::string ReportNestedExceptions( std::exception_ptr ePtr )
 	{
 		return ResolveNestedExceptions( ePtr );
 	}
