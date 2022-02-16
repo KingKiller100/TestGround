@@ -5,44 +5,46 @@
 
 void kLibTest();
 
-void FlushOutputs();
+void FlushStdStreams();
 
 int main()
 {
 	try
 	{
+		klib::kLocale::SetDefaultLocale();
+		klib::kCalendar::UsePlatformCalendarInfoSource();
 		kLibTest();
+
 		std::cout << "\nPress 'ENTER' to exit...";
 		std::cin.get();
 
-		FlushOutputs();
+		FlushStdStreams();
 	}
 	catch ( ... )
 	{
 		std::cerr << "Exception occurred:\n";
 		std::cerr << debug::ReportNestedExceptions();
+		std::cin.get();
+		FlushStdStreams();
 		return EXIT_FAILURE;
 	}
-
 
 	return EXIT_SUCCESS;
 }
 
 void kLibTest()
 {
-	klib::kLocale::SetDefaultLocale();
-	klib::kCalendar::UsePlatformCalendarInfoSource();
 	kTest::TesterManager testMan;
-	testMan.Initialize( true );
+	testMan.Initialize( kTest::TesterManager::InitializationRequest::NoPerformanceTests );
 	kTest::InitializeMathsTests( testMan );
 	kTest::InitializeUtilityTests( testMan, false );
 	kTest::InitializeTemplateTests( testMan );
-	testMan.RunAll( true );
-	testMan.RunPerformanceTests();
+	testMan.RunAll( kTest::TesterManager::ResourceUtilization::Single );
+	//testMan.RunPerformanceTests();
 	testMan.Shutdown();
 }
 
-void FlushOutputs()
+void FlushStdStreams()
 {
 	std::cout.flush();
 	std::cerr.flush();
