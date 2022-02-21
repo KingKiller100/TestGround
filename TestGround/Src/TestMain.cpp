@@ -35,11 +35,11 @@ int main()
 void kLibTest()
 {
 	kTest::TesterManager testMan;
-	testMan.Initialize( kTest::TesterManager::InitializationRequest::NoPerformanceTests );
+	testMan.Initialize();
 	kTest::InitializeMathsTests( testMan );
 	kTest::InitializeUtilityTests( testMan, false );
 	kTest::InitializeTemplateTests( testMan );
-	testMan.RunAll( kTest::TesterManager::ResourceUtilization::Single );
+	testMan.RunAll( kTest::TesterManager::ResourceUtilization::All );
 	//testMan.RunPerformanceTests();
 	testMan.Shutdown();
 }
